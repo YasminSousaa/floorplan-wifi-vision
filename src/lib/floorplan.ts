@@ -136,30 +136,35 @@ export function quality(dbm: number) {
   return { label: "Sem cobertura", tone: "dead" as const };
 }
 
+type Stop = { at: number; rgb: [number, number, number] };
+
+const COLOR_STOPS: Stop[] = [
+  { at: -95, rgb: [12, 18, 34] },
+  { at: -85, rgb: [46, 34, 92] },
+  { at: -75, rgb: [26, 92, 150] },
+  { at: -65, rgb: [16, 160, 152] },
+  { at: -55, rgb: [86, 200, 96] },
+  { at: -45, rgb: [230, 200, 70] },
+  { at: -35, rgb: [245, 122, 60] },
+];
+
 /** Cor RGB do heatmap para um RSSI. */
 export function signalColor(dbm: number): [number, number, number] {
-  const stops: Array<[number, [number, number, number]]> = [
-    [-95, [12, 18, 34]],
-    [-85, [46, 34, 92]],
-    [-75, [26, 92, 150]],
-    [-65, [16, 160, 152]],
-    [-55, [86, 200, 96]],
-    [-45, [230, 200, 70]],
-    [-35, [245, 122, 60]],
-  ];
-  if (dbm <= stops[0][0]) return stops[0][1];
-  if (dbm >= stops[stops.length - 1][0]) return stops[stops.length - 1][1];
-  for (let i = 0; i < stops.length - 1; i++) {
-    const [a, ca] = stops[i];
-    const [b, cb] = stops[i + 1];
-    if (dbm >= a && dbm <= b) {
-      const t = (dbm - a) / (b - a);
+  const first = COLOR_STOPS[0]!;
+  const last = COLOR_STOPS[COLOR_STOPS.length - 1]!;
+  if (dbm <= first.at) return first.rgb;
+  if (dbm >= last.at) return last.rgb;
+  for (let i = 0; i < COLOR_STOPS.length - 1; i++) {
+    const a = COLOR_STOPS[i]!;
+    const b = COLOR_STOPS[i + 1]!;
+    if (dbm >= a.at && dbm <= b.at) {
+      const t = (dbm - a.at) / (b.at - a.at);
       return [
-        Math.round(ca[0] + (cb[0] - ca[0]) * t),
-        Math.round(ca[1] + (cb[1] - ca[1]) * t),
-        Math.round(ca[2] + (cb[2] - ca[2]) * t),
+        Math.round(a.rgb[0] + (b.rgb[0] - a.rgb[0]) * t),
+        Math.round(a.rgb[1] + (b.rgb[1] - a.rgb[1]) * t),
+        Math.round(a.rgb[2] + (b.rgb[2] - a.rgb[2]) * t),
       ];
     }
   }
-  return stops[0][1];
+  return first.rgb;
 }
