@@ -1,24 +1,42 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
+import { ClientOnly } from "@tanstack/react-router";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+const Viewer = lazy(() =>
+  import("@/components/wifi/Viewer").then((m) => ({ default: m.Viewer })),
+);
+
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Planta 3D com Mapa de Calor Wi-Fi | SignalPlan" },
+      {
+        name: "description",
+        content:
+          "Visualize plantas baixas em 3D com heatmap de sinal Wi-Fi, alcance dos roteadores e velocidade estimada em cada ponto do imóvel.",
+      },
+      { property: "og:title", content: "Planta 3D com Mapa de Calor Wi-Fi | SignalPlan" },
+      {
+        property: "og:description",
+        content:
+          "Simulação 3D de cobertura de rede: RSSI, alcance e velocidade estimada por ambiente.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main>
+      <h1 className="sr-only">Visualização 3D de plantas baixas com sinal Wi-Fi</h1>
+      <ClientOnly fallback={<div className="viewer-loading">Carregando planta 3D…</div>}>
+        <Suspense fallback={<div className="viewer-loading">Carregando planta 3D…</div>}>
+          <Viewer />
+        </Suspense>
+      </ClientOnly>
+    </main>
   );
 }
