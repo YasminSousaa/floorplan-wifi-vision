@@ -317,6 +317,9 @@ body {
 }
 
 .seg { display: flex; gap: 0.35rem; }
+.seg-wrap { flex-wrap: wrap; }
+.seg-wrap .seg-btn { flex: 1 1 45%; padding: 0.45rem 0.5rem; }
+
 .seg-btn {
   flex: 1;
   padding: 0.45rem 0;

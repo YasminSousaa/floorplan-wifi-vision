@@ -1,12 +1,13 @@
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useMemo, useState } from "react";
 import {
-  accessPoints,
   bestSignal,
   estimateSpeed,
+  floorPlans,
+  getPlan,
   quality,
-  rooms,
   type AccessPoint,
+  type FloorPlan,
 } from "@/lib/floorplan";
 import { Scene } from "./Scene";
 
@@ -16,8 +17,8 @@ const BANDS = [
   { value: 6, label: "6 GHz" },
 ];
 
-function roomStats(aps: AccessPoint[], band: number) {
-  return rooms.map((r) => {
+function roomStats(plan: FloorPlan, aps: AccessPoint[], band: number) {
+  return plan.rooms.map((r) => {
     let sum = 0;
     let worst = 0;
     let n = 0;
@@ -25,7 +26,7 @@ function roomStats(aps: AccessPoint[], band: number) {
       for (let j = 0; j < 5; j++) {
         const x = r.x + ((i + 0.5) / 5) * r.w;
         const z = r.z + ((j + 0.5) / 5) * r.d;
-        const { dbm } = bestSignal(aps, x, z, band);
+        const { dbm } = bestSignal(plan, aps, x, z, band);
         sum += dbm;
         worst = n === 0 ? dbm : Math.min(worst, dbm);
         n++;
@@ -37,28 +38,52 @@ function roomStats(aps: AccessPoint[], band: number) {
 }
 
 export function Viewer() {
+  const [planId, setPlanId] = useState("recepcao");
+  const plan = useMemo(() => getPlan(planId), [planId]);
+
   const [band, setBand] = useState<number>(5);
   const [heat, setHeat] = useState(0.85);
   const [walls, setWalls] = useState(0.9);
   const [labels, setLabels] = useState(true);
-  const [active, setActive] = useState<string[]>(accessPoints.map((a) => a.id));
-  const [selected, setSelected] = useState<string | null>("ap1");
-  const [probe, setProbe] = useState<{ x: number; z: number } | null>({ x: 13.6, z: 8.2 });
+  const [active, setActive] = useState<string[]>(plan.accessPoints.map((a) => a.id));
+  const [selected, setSelected] = useState<string | null>(plan.accessPoints[0]?.id ?? null);
+  const [probe, setProbe] = useState<{ x: number; z: number } | null>({
+    x: plan.width / 2,
+    z: plan.depth / 2,
+  });
 
-  const aps = useMemo(() => accessPoints.filter((a) => active.includes(a.id)), [active]);
-  const stats = useMemo(() => roomStats(aps, band), [aps, band]);
+  const changePlan = (id: string) => {
+    const next = getPlan(id);
+    setPlanId(id);
+    setActive(next.accessPoints.map((a) => a.id));
+    setSelected(next.accessPoints[0]?.id ?? null);
+    setProbe({ x: next.width / 2, z: next.depth / 2 });
+  };
+
+  const aps = useMemo(
+    () => plan.accessPoints.filter((a) => active.includes(a.id)),
+    [plan, active],
+  );
+  const stats = useMemo(() => roomStats(plan, aps, band), [plan, aps, band]);
 
   const toggleAp = (id: string) =>
     setActive((cur) => (cur.includes(id) ? cur.filter((i) => i !== id) : [...cur, id]));
 
-  const probeInfo = probe ? bestSignal(aps, probe.x, probe.z, band) : null;
+  const probeInfo = probe ? bestSignal(plan, aps, probe.x, probe.z, band) : null;
+  const span = Math.max(plan.width, plan.depth);
 
   return (
     <div className="viewer-shell">
       <div className="viewer-canvas">
-        <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 14, 17], fov: 45 }}>
+        <Canvas
+          key={plan.id}
+          shadows
+          dpr={[1, 2]}
+          camera={{ position: [0, span * 0.85, span * 1.05], fov: 45, far: span * 8 }}
+        >
           <Suspense fallback={null}>
             <Scene
+              plan={plan}
               band={band}
               heatmapOpacity={heat}
               wallOpacity={walls}
@@ -91,12 +116,24 @@ export function Viewer() {
       <aside className="viewer-panel">
         <header className="panel-head">
           <span className="panel-eyebrow">Mapa de calor Wi-Fi</span>
-          <h1>Planta 3D · Cobertura de rede</h1>
-          <p>
-            Simulação de propagação com perda por distância e atenuação por parede
-            (concreto, drywall e vidro).
-          </p>
+          <h1>{plan.name}</h1>
+          <p>{plan.subtitle}</p>
         </header>
+
+        <section className="panel-block">
+          <h2>Planta</h2>
+          <div className="seg seg-wrap">
+            {floorPlans.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => changePlan(p.id)}
+                className={plan.id === p.id ? "seg-btn seg-btn-on" : "seg-btn"}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </section>
 
         <section className="panel-block">
           <h2>Banda</h2>
@@ -116,7 +153,7 @@ export function Viewer() {
         <section className="panel-block">
           <h2>Pontos de acesso</h2>
           <ul className="ap-list">
-            {accessPoints.map((ap) => {
+            {plan.accessPoints.map((ap) => {
               const on = active.includes(ap.id);
               return (
                 <li key={ap.id}>
