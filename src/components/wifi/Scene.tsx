@@ -3,28 +3,22 @@ import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import {
-  PLAN_D,
-  PLAN_W,
-  WALL_H,
-  accessPoints as allAps,
   bestSignal,
   estimateSpeed,
   quality,
-  rooms,
-  walls,
   type AccessPoint,
+  type FloorPlan,
 } from "@/lib/floorplan";
 import { Heatmap } from "./Heatmap";
 
-const WALL_T = 0.16;
-
-function Walls({ opacity }: { opacity: number }) {
+function Walls({ plan, opacity }: { plan: FloorPlan; opacity: number }) {
+  const thickness = Math.max(0.16, plan.width / 180);
   return (
     <group>
-      {walls.map((w, i) => {
+      {plan.walls.map((w, i) => {
         const len = Math.hypot(w.x2 - w.x1, w.z2 - w.z1);
         const angle = Math.atan2(w.z2 - w.z1, w.x2 - w.x1);
-        const h = w.kind === "vidro" ? WALL_H * 0.92 : WALL_H;
+        const h = w.kind === "vidro" ? plan.wallHeight * 0.92 : plan.wallHeight;
         const color =
           w.kind === "concreto" ? "#8f97a8" : w.kind === "drywall" ? "#b9c0cc" : "#7fd9e8";
         return (
@@ -35,7 +29,7 @@ function Walls({ opacity }: { opacity: number }) {
             position={[(w.x1 + w.x2) / 2, h / 2, (w.z1 + w.z2) / 2]}
             rotation-y={-angle}
           >
-            <boxGeometry args={[len + WALL_T, h, WALL_T]} />
+            <boxGeometry args={[len + thickness, h, thickness]} />
             <meshStandardMaterial
               color={color}
               roughness={w.kind === "vidro" ? 0.08 : 0.85}
@@ -51,19 +45,20 @@ function Walls({ opacity }: { opacity: number }) {
   );
 }
 
-function RoomLabels() {
+function RoomLabels({ plan }: { plan: FloorPlan }) {
+  const size = Math.max(0.3, plan.width / 46);
   return (
     <>
-      {rooms.map((r) => (
+      {plan.rooms.map((r) => (
         <Text
           key={r.name}
           position={[r.x + r.w / 2, 0.06, r.z + r.d / 2]}
           rotation-x={-Math.PI / 2}
-          fontSize={0.34}
+          fontSize={size}
           color="#cfe6ef"
           anchorX="center"
           anchorY="middle"
-          outlineWidth={0.012}
+          outlineWidth={size * 0.035}
           outlineColor="#05080f"
         >
           {r.name.toUpperCase()}
@@ -75,10 +70,12 @@ function RoomLabels() {
 
 function ApMarker({
   ap,
+  scale,
   active,
   onSelect,
 }: {
   ap: AccessPoint;
+  scale: number;
   active: boolean;
   onSelect: () => void;
 }) {
@@ -94,7 +91,7 @@ function ApMarker({
   return (
     <group position={[ap.x, ap.y, ap.z]}>
       <mesh onClick={onSelect} castShadow>
-        <sphereGeometry args={[0.16, 24, 24]} />
+        <sphereGeometry args={[0.16 * scale, 24, 24]} />
         <meshStandardMaterial
           color={active ? "#5ff0d0" : "#4b6b7a"}
           emissive={active ? "#2ad6b2" : "#132228"}
@@ -102,10 +99,10 @@ function ApMarker({
         />
       </mesh>
       <mesh ref={ring} rotation-x={-Math.PI / 2} position={[0, -ap.y + 0.03, 0]}>
-        <ringGeometry args={[0.5, 0.56, 48]} />
+        <ringGeometry args={[0.5 * scale, 0.56 * scale, 48]} />
         <meshBasicMaterial color="#5ff0d0" transparent opacity={0.3} depthWrite={false} />
       </mesh>
-      <Html center distanceFactor={14} position={[0, 0.55, 0]}>
+      <Html center distanceFactor={14 * scale} position={[0, 0.55 * scale, 0]}>
         <div className={active ? "ap-tag ap-tag-active" : "ap-tag"}>
           {ap.name} · {ap.band} GHz
         </div>
@@ -115,32 +112,36 @@ function ApMarker({
 }
 
 function Probe({
+  plan,
   point,
   aps,
   band,
+  scale,
 }: {
+  plan: FloorPlan;
   point: { x: number; z: number };
   aps: AccessPoint[];
   band: number;
+  scale: number;
 }) {
   const { dbm, ap } = useMemo(
-    () => bestSignal(aps, point.x, point.z, band),
-    [aps, point, band],
+    () => bestSignal(plan, aps, point.x, point.z, band),
+    [plan, aps, point, band],
   );
   const q = quality(dbm);
   const speed = estimateSpeed(dbm, band);
 
   return (
     <group position={[point.x, 0, point.z]}>
-      <mesh position={[0, 0.9, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, 1.8, 8]} />
+      <mesh position={[0, 0.9 * scale, 0]}>
+        <cylinderGeometry args={[0.02 * scale, 0.02 * scale, 1.8 * scale, 8]} />
         <meshBasicMaterial color="#f5c84b" />
       </mesh>
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.05, 0]}>
-        <ringGeometry args={[0.24, 0.3, 40]} />
+        <ringGeometry args={[0.24 * scale, 0.3 * scale, 40]} />
         <meshBasicMaterial color="#f5c84b" />
       </mesh>
-      <Html center distanceFactor={13} position={[0, 2.1, 0]}>
+      <Html center distanceFactor={13 * scale} position={[0, 2.1 * scale, 0]}>
         <div className="probe-card">
           <span className={`probe-dot tone-${q.tone}`} />
           <strong>{dbm.toFixed(0)} dBm</strong>
@@ -156,6 +157,7 @@ function Probe({
 }
 
 export function Scene({
+  plan,
   band,
   heatmapOpacity,
   wallOpacity,
@@ -166,6 +168,7 @@ export function Scene({
   selectedAp,
   onSelectAp,
 }: {
+  plan: FloorPlan;
   band: number;
   heatmapOpacity: number;
   wallOpacity: number;
@@ -176,31 +179,36 @@ export function Scene({
   selectedAp: string | null;
   onSelectAp: (id: string) => void;
 }) {
-  const aps = useMemo(() => allAps.filter((a) => activeAps.includes(a.id)), [activeAps]);
+  const aps = useMemo(
+    () => plan.accessPoints.filter((a) => activeAps.includes(a.id)),
+    [plan, activeAps],
+  );
+  const scale = Math.max(1, plan.width / 20);
+  const span = Math.max(plan.width, plan.depth);
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     onProbe({
-      x: THREE.MathUtils.clamp(e.point.x, 0.2, PLAN_W - 0.2),
-      z: THREE.MathUtils.clamp(e.point.z, 0.2, PLAN_D - 0.2),
+      x: THREE.MathUtils.clamp(e.point.x + plan.width / 2, 0.2, plan.width - 0.2),
+      z: THREE.MathUtils.clamp(e.point.z + plan.depth / 2, 0.2, plan.depth - 0.2),
     });
   };
 
   return (
     <>
       <color attach="background" args={["#070b14"]} />
-      <fog attach="fog" args={["#070b14", 24, 62]} />
+      <fog attach="fog" args={["#070b14", span * 1.6, span * 4.2]} />
       <ambientLight intensity={0.45} />
       <directionalLight
-        position={[10, 16, 8]}
+        position={[span * 0.6, span, span * 0.5]}
         intensity={1.5}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
-        shadow-camera-left={-16}
-        shadow-camera-right={16}
-        shadow-camera-top={16}
-        shadow-camera-bottom={-16}
+        shadow-camera-left={-span}
+        shadow-camera-right={span}
+        shadow-camera-top={span}
+        shadow-camera-bottom={-span}
       />
       <Environment>
         <Lightformer intensity={1.6} position={[0, 8, 0]} scale={[14, 14, 1]} />
@@ -213,47 +221,52 @@ export function Scene({
         />
       </Environment>
 
-      <group position={[-PLAN_W / 2, 0, -PLAN_D / 2]}>
+      <group position={[-plan.width / 2, 0, -plan.depth / 2]}>
         {/* Piso clicável */}
         <mesh
           rotation-x={-Math.PI / 2}
-          position={[PLAN_W / 2, 0, PLAN_D / 2]}
+          position={[plan.width / 2, 0, plan.depth / 2]}
           receiveShadow
           onClick={handleClick}
         >
-          <planeGeometry args={[PLAN_W, PLAN_D]} />
-          <meshStandardMaterial color="#141b28" roughness={0.95} metalness={0.05} />
+          <planeGeometry args={[plan.width, plan.depth]} />
+          <meshStandardMaterial
+            color={plan.outdoor ? "#101d1a" : "#141b28"}
+            roughness={0.95}
+            metalness={0.05}
+          />
         </mesh>
 
         <gridHelper
-          args={[Math.max(PLAN_W, PLAN_D), Math.max(PLAN_W, PLAN_D), "#22304a", "#182031"]}
-          position={[PLAN_W / 2, 0.015, PLAN_D / 2]}
+          args={[span, Math.min(80, Math.round(span)), "#22304a", "#182031"]}
+          position={[plan.width / 2, 0.015, plan.depth / 2]}
         />
 
-        <Heatmap aps={aps} band={band} opacity={heatmapOpacity} height={0.04} />
+        <Heatmap plan={plan} aps={aps} band={band} opacity={heatmapOpacity} height={0.04} />
 
-        {showLabels && <RoomLabels />}
-        <Walls opacity={wallOpacity} />
+        {showLabels && <RoomLabels plan={plan} />}
+        <Walls plan={plan} opacity={wallOpacity} />
 
         {aps.map((ap) => (
           <ApMarker
             key={ap.id}
             ap={ap}
+            scale={scale}
             active={selectedAp === ap.id}
             onSelect={() => onSelectAp(ap.id)}
           />
         ))}
 
-        {probe && <Probe point={probe} aps={aps} band={band} />}
+        {probe && <Probe plan={plan} point={probe} aps={aps} band={band} scale={scale} />}
       </group>
 
       <OrbitControls
         makeDefault
         enablePan
-        minDistance={6}
-        maxDistance={44}
+        minDistance={span * 0.25}
+        maxDistance={span * 3}
         maxPolarAngle={Math.PI / 2.15}
-        target={[0, 0.8, 0]}
+        target={[0, plan.wallHeight * 0.3, 0]}
       />
     </>
   );

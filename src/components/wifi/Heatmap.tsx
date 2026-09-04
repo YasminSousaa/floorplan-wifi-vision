@@ -1,21 +1,17 @@
 import { useMemo } from "react";
 import * as THREE from "three";
-import {
-  PLAN_D,
-  PLAN_W,
-  bestSignal,
-  signalColor,
-  type AccessPoint,
-} from "@/lib/floorplan";
+import { bestSignal, signalColor, type AccessPoint, type FloorPlan } from "@/lib/floorplan";
 
 const RES = 128;
 
 export function Heatmap({
+  plan,
   aps,
   band,
   opacity,
   height,
 }: {
+  plan: FloorPlan;
   aps: AccessPoint[];
   band: number;
   opacity: number;
@@ -23,7 +19,7 @@ export function Heatmap({
 }) {
   const texture = useMemo(() => {
     const cw = RES;
-    const ch = Math.round((RES * PLAN_D) / PLAN_W);
+    const ch = Math.max(8, Math.round((RES * plan.depth) / plan.width));
     const canvas = document.createElement("canvas");
     canvas.width = cw;
     canvas.height = ch;
@@ -31,9 +27,9 @@ export function Heatmap({
     const img = ctx.createImageData(cw, ch);
     for (let j = 0; j < ch; j++) {
       for (let i = 0; i < cw; i++) {
-        const x = ((i + 0.5) / cw) * PLAN_W;
-        const z = ((j + 0.5) / ch) * PLAN_D;
-        const { dbm } = bestSignal(aps, x, z, band);
+        const x = ((i + 0.5) / cw) * plan.width;
+        const z = ((j + 0.5) / ch) * plan.depth;
+        const { dbm } = bestSignal(plan, aps, x, z, band);
         const [r, g, b] = signalColor(dbm);
         const o = (j * cw + i) * 4;
         img.data[o] = r;
@@ -48,17 +44,17 @@ export function Heatmap({
     tex.minFilter = THREE.LinearFilter;
     tex.magFilter = THREE.LinearFilter;
     return tex;
-  }, [aps, band]);
+  }, [plan, aps, band]);
 
   if (opacity <= 0) return null;
 
   return (
     <mesh
-      position={[PLAN_W / 2, height, PLAN_D / 2]}
+      position={[plan.width / 2, height, plan.depth / 2]}
       rotation-x={-Math.PI / 2}
       renderOrder={2}
     >
-      <planeGeometry args={[PLAN_W, PLAN_D]} />
+      <planeGeometry args={[plan.width, plan.depth]} />
       <meshBasicMaterial
         map={texture}
         transparent
