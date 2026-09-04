@@ -77,44 +77,81 @@ const RESORT_D = 290;
 const resort: FloorPlan = {
   id: "resort",
   name: "Resort · Vista Geral",
-  subtitle: "Costa Serena Resort & Spa — 18 hectares",
+  subtitle: "Costa Serena Resort & Spa — 18 ha · 320 apartamentos",
   width: RESORT_W,
   depth: RESORT_D,
   wallHeight: 9,
   outdoor: true,
   rooms: [
-    { name: "Estacionamento", x: 30, z: 22, w: 80, d: 30 },
-    { name: "Lobby / Recepção", x: 130, z: 40, w: 60, d: 40 },
-    { name: "Centro de Convenções", x: 225, z: 26, w: 120, d: 48 },
-    { name: "Bloco A", x: 12, z: 60, w: 100, d: 30 },
-    { name: "Bloco B", x: 268, z: 68, w: 110, d: 32 },
-    { name: "Restaurantes", x: 205, z: 78, w: 70, d: 32 },
-    { name: "Piscina Principal", x: 96, z: 96, w: 76, d: 48 },
-    { name: "Quadras Esportivas", x: 205, z: 122, w: 76, d: 44 },
-    { name: "Bloco C", x: 14, z: 148, w: 92, d: 34 },
-    { name: "Bloco D", x: 262, z: 152, w: 112, d: 36 },
-    { name: "Piscina Secundária", x: 112, z: 158, w: 60, d: 38 },
-    { name: "Jardins", x: 186, z: 172, w: 60, d: 40 },
-    { name: "Praia Privativa", x: 40, z: 220, w: 320, d: 50 },
+    // Noroeste — serviço
+    { name: "Área de Serviço", x: 32, z: 13, w: 31, d: 24 },
+    { name: "Depósitos e Apoio", x: 32, z: 38, w: 31, d: 16 },
+    { name: "Oficina", x: 32, z: 55, w: 31, d: 12 },
+    // Blocos de hospedagem (8 blocos · 40 aptos cada)
+    { name: "Bloco 01", x: 89, z: 7, w: 66, d: 34 },
+    { name: "Bloco 02", x: 175, z: 7, w: 58, d: 34 },
+    { name: "Bloco 03", x: 91, z: 63, w: 63, d: 30 },
+    { name: "Bloco 04", x: 174, z: 63, w: 59, d: 30 },
+    { name: "Bloco 05", x: 108, z: 112, w: 53, d: 31 },
+    { name: "Bloco 06", x: 172, z: 112, w: 55, d: 31 },
+    { name: "Bloco 07", x: 108, z: 165, w: 53, d: 30 },
+    { name: "Bloco 08", x: 172, z: 165, w: 55, d: 30 },
+    // Lazer e esportes
+    { name: "Área de Lazer / Salão de Jogos", x: 250, z: 6, w: 47, d: 48 },
+    { name: "Quadra Poliesportiva", x: 306, z: 7, w: 47, d: 38 },
+    { name: "Quadra de Tênis", x: 306, z: 50, w: 47, d: 19 },
+    // Recepção
+    { name: "Administração", x: 46, z: 91, w: 40, d: 22 },
+    { name: "Concierge", x: 46, z: 114, w: 40, d: 16 },
+    { name: "Recepção", x: 50, z: 131, w: 44, d: 22 },
+    { name: "Lobby Principal", x: 50, z: 154, w: 40, d: 24 },
+    { name: "Área de Espera", x: 62, z: 179, w: 30, d: 14 },
+    // Piscinas
+    { name: "Piscina Adulto", x: 239, z: 99, w: 51, d: 53 },
+    { name: "Piscina Infantil", x: 229, z: 147, w: 18, d: 20 },
+    { name: "Deck da Piscina", x: 262, z: 152, w: 43, d: 34 },
+    // Alimentação
+    { name: "Restaurante ao Ar Livre", x: 313, z: 100, w: 39, d: 39 },
+    { name: "Quiosques e Descanso", x: 316, z: 167, w: 46, d: 19 },
+    { name: "Restaurante Praia", x: 312, z: 202, w: 36, d: 29 },
+    // Sul — eventos e apoio
+    { name: "Estacionamento (280 vagas)", x: 17, z: 204, w: 63, d: 79 },
+    { name: "Centro de Convenções", x: 101, z: 208, w: 95, d: 75 },
+    { name: "Centro de Eventos", x: 213, z: 208, w: 83, d: 75 },
+    { name: "Cozinha Industrial", x: 298, z: 227, w: 34, d: 32 },
+    { name: "Refeitório Funcionários", x: 333, z: 227, w: 38, d: 22 },
+    { name: "Área Técnica / Manutenção", x: 333, z: 250, w: 38, d: 37 },
+    // Leste
+    { name: "Praia Privativa", x: 372, z: 10, w: 46, d: 270 },
   ],
   walls: [
-    ...box(12, 60, 100, 30, C, "concreto"),
-    ...box(268, 68, 110, 32, C, "concreto"),
-    ...box(14, 148, 92, 34, C, "concreto"),
-    ...box(262, 152, 112, 36, C, "concreto"),
-    ...box(225, 26, 120, 48, C, "concreto"),
-    ...box(130, 40, 60, 40, C, "concreto"),
-    ...box(205, 78, 70, 32, G, "vidro"),
+    ...box(32, 13, 31, 54, C, "concreto"),
+    ...box(89, 7, 66, 34, C, "concreto"),
+    ...box(175, 7, 58, 34, C, "concreto"),
+    ...box(91, 63, 63, 30, C, "concreto"),
+    ...box(174, 63, 59, 30, C, "concreto"),
+    ...box(108, 112, 53, 31, C, "concreto"),
+    ...box(172, 112, 55, 31, C, "concreto"),
+    ...box(108, 165, 53, 30, C, "concreto"),
+    ...box(172, 165, 55, 30, C, "concreto"),
+    ...box(250, 6, 47, 48, C, "concreto"),
+    ...box(46, 91, 48, 102, C, "concreto"),
+    ...box(101, 208, 95, 75, C, "concreto"),
+    ...box(213, 208, 83, 75, C, "concreto"),
+    ...box(298, 227, 73, 60, C, "concreto"),
+    ...box(313, 100, 39, 39, G, "vidro"),
   ],
   accessPoints: [
-    { id: "r-lobby", name: "AP Lobby", x: 160, z: 60, y: 4, txPower: 24, band: 5 },
-    { id: "r-conv", name: "AP Convenções", x: 285, z: 50, y: 5, txPower: 26, band: 5 },
-    { id: "r-pool", name: "AP Piscina", x: 134, z: 120, y: 4, txPower: 24, band: 2.4 },
-    { id: "r-bloco-a", name: "AP Bloco A", x: 62, z: 75, y: 6, txPower: 22, band: 5 },
-    { id: "r-bloco-b", name: "AP Bloco B", x: 323, z: 84, y: 6, txPower: 22, band: 5 },
-    { id: "r-bloco-c", name: "AP Bloco C", x: 60, z: 165, y: 6, txPower: 22, band: 5 },
-    { id: "r-bloco-d", name: "AP Bloco D", x: 318, z: 170, y: 6, txPower: 22, band: 5 },
-    { id: "r-praia", name: "AP Praia", x: 200, z: 232, y: 5, txPower: 24, band: 2.4 },
+    { id: "r-lobby", name: "AP Lobby Principal", x: 70, z: 160, y: 5, txPower: 24, band: 5 },
+    { id: "r-conv", name: "AP Centro de Convenções", x: 148, z: 245, y: 6, txPower: 26, band: 5 },
+    { id: "r-eventos", name: "AP Centro de Eventos", x: 254, z: 245, y: 6, txPower: 26, band: 5 },
+    { id: "r-pool", name: "AP Piscina", x: 265, z: 130, y: 5, txPower: 24, band: 2.4 },
+    { id: "r-b01", name: "AP Blocos 01–02", x: 165, z: 24, y: 8, txPower: 22, band: 5 },
+    { id: "r-b03", name: "AP Blocos 03–04", x: 164, z: 78, y: 8, txPower: 22, band: 5 },
+    { id: "r-b05", name: "AP Blocos 05–06", x: 166, z: 127, y: 8, txPower: 22, band: 5 },
+    { id: "r-b07", name: "AP Blocos 07–08", x: 166, z: 180, y: 8, txPower: 22, band: 5 },
+    { id: "r-quadras", name: "AP Quadras", x: 320, z: 45, y: 6, txPower: 22, band: 2.4 },
+    { id: "r-praia", name: "AP Praia", x: 372, z: 150, y: 6, txPower: 24, band: 2.4 },
   ],
 };
 
@@ -122,48 +159,72 @@ const resort: FloorPlan = {
 /* 2. Recepção / Lobby                                                 */
 /* ------------------------------------------------------------------ */
 
-const REC_W = 36;
-const REC_D = 24;
+const REC_W = 40;
+const REC_D = 26;
 
 const recepcao: FloorPlan = {
   id: "recepcao",
-  name: "Recepção / Lobby",
-  subtitle: "Pavimento térreo — acesso principal",
+  name: "Lobby e Recepção Principal",
+  subtitle: "Planta técnica 1:200 — pavimento térreo",
   width: REC_W,
   depth: REC_D,
-  wallHeight: 3.2,
+  wallHeight: 3.4,
   rooms: [
-    { name: "Banheiro Masculino", x: 1, z: 1, w: 6.5, d: 4 },
-    { name: "Banheiro Feminino", x: 1, z: 5, w: 6.5, d: 3 },
-    { name: "Banheiro Acessível", x: 1, z: 8, w: 6.5, d: 3.5 },
-    { name: "Recepção", x: 9, z: 1, w: 12, d: 7 },
-    { name: "Administração", x: 21.5, z: 1, w: 7.5, d: 6 },
-    { name: "Elevadores", x: 29, z: 1, w: 6, d: 6 },
-    { name: "Escada", x: 29, z: 7, w: 6, d: 5 },
-    { name: "Concierge", x: 23, z: 8, w: 4.5, d: 3 },
-    { name: "Lobby", x: 9, z: 9, w: 13, d: 9 },
-    { name: "Área de Espera", x: 1, z: 12, w: 8, d: 7 },
-    { name: "Lounge", x: 22, z: 12, w: 12, d: 8 },
-    { name: "Entrada Principal", x: 9, z: 19.5, w: 16, d: 4 },
+    { name: "Administração", x: 0.4, z: 4.3, w: 4.4, d: 2.5 },
+    { name: "Administração", x: 0.4, z: 7.7, w: 4.4, d: 2.5 },
+    { name: "Recepção", x: 5, z: 3.6, w: 10.8, d: 6.2 },
+    { name: "Foyer e Lounge", x: 5, z: 10.7, w: 8.3, d: 4.2 },
+    { name: "Área de Poltronas", x: 0.6, z: 15.8, w: 11, d: 6.4 },
+    { name: "Área de Espera: Sofás", x: 12, z: 16.6, w: 5, d: 5.6 },
+    { name: "Concierge / Informações", x: 19.2, z: 6.2, w: 5, d: 3.6 },
+    { name: "Banheiros", x: 27, z: 0.6, w: 6.3, d: 4.1 },
+    { name: "Elevadores", x: 26.7, z: 5.9, w: 6.6, d: 2.6 },
+    { name: "Circulação Principal de Hóspedes", x: 19.2, z: 10.7, w: 17, d: 3.2 },
+    { name: "Elevadores", x: 26.7, z: 14.3, w: 7.9, d: 3.7 },
+    { name: "Escada", x: 34.8, z: 5.9, w: 3.6, d: 4.5 },
+    { name: "Escada", x: 34.8, z: 14.3, w: 3.6, d: 4.5 },
+    { name: "Banheiros", x: 25.8, z: 19.3, w: 13.4, d: 4.5 },
   ],
   walls: [
-    ...box(0, 0, REC_W, REC_D, C, "concreto"),
-    ...box(1, 1, 6.5, 10.5, D, "drywall"),
-    { x1: 1, z1: 5, x2: 7.5, z2: 5, att: D, kind: "drywall" },
-    { x1: 1, z1: 8, x2: 7.5, z2: 8, att: D, kind: "drywall" },
-    ...box(21.5, 1, 7.5, 6, D, "drywall"),
-    ...box(29, 1, 6, 11, C, "concreto"),
-    { x1: 29, z1: 7, x2: 35, z2: 7, att: C, kind: "concreto" },
-    { x1: 22, z1: 8, x2: 27.5, z2: 8, att: D, kind: "drywall" },
-    { x1: 22, z1: 8, x2: 22, z2: 11, att: D, kind: "drywall" },
-    // fachada de vidro (entrada)
-    { x1: 0, z1: 19.4, x2: REC_W, z2: 19.4, att: G, kind: "vidro" },
+    // envoltória em L (bloco norte recuado à esquerda)
+    { x1: 5.6, z1: 2.8, x2: 39.6, z2: 2.8, att: C, kind: "concreto" },
+    { x1: 39.6, z1: 2.8, x2: 39.6, z2: 24.2, att: C, kind: "concreto" },
+    { x1: 39.6, z1: 24.2, x2: 25.4, z2: 24.2, att: C, kind: "concreto" },
+    { x1: 25.4, z1: 24.2, x2: 25.4, z2: 23, att: C, kind: "concreto" },
+    { x1: 25.4, z1: 23, x2: 11.8, z2: 23, att: C, kind: "concreto" },
+    { x1: 11.8, z1: 23, x2: 11.8, z2: 22.6, att: C, kind: "concreto" },
+    { x1: 11.8, z1: 22.6, x2: 0.2, z2: 22.6, att: C, kind: "concreto" },
+    { x1: 0.2, z1: 22.6, x2: 0.2, z2: 4, att: C, kind: "concreto" },
+    { x1: 0.2, z1: 4, x2: 5.6, z2: 4, att: C, kind: "concreto" },
+    { x1: 5.6, z1: 4, x2: 5.6, z2: 2.8, att: C, kind: "concreto" },
+    // administração
+    ...box(0.2, 4.2, 4.6, 6.2, D, "drywall"),
+    { x1: 0.2, z1: 7.2, x2: 4.8, z2: 7.2, att: D, kind: "drywall" },
+    // concierge
+    ...box(19, 5.6, 5.4, 4.6, D, "drywall"),
+    // banheiros norte
+    ...box(26.6, 2.8, 7, 4.6, C, "concreto"),
+    // núcleos de elevadores
+    ...box(26.6, 5.6, 7, 3.2, C, "concreto"),
+    ...box(26.6, 14, 8.2, 4.2, C, "concreto"),
+    // escadas
+    ...box(34.8, 5.6, 3.8, 4.8, C, "concreto"),
+    ...box(34.8, 14, 3.8, 4.8, C, "concreto"),
+    // banheiros sul
+    ...box(25.6, 19, 14, 5.2, C, "concreto"),
+    { x1: 30, z1: 19, x2: 30, z2: 24.2, att: D, kind: "drywall" },
+    { x1: 34, z1: 19, x2: 34, z2: 24.2, att: D, kind: "drywall" },
+    // divisórias leves do lounge
+    { x1: 13.6, z1: 10.4, x2: 13.6, z2: 16.4, att: D, kind: "drywall" },
+    { x1: 11.8, z1: 16.4, x2: 17.4, z2: 16.4, att: D, kind: "drywall" },
+    { x1: 17.6, z1: 14.4, x2: 24.4, z2: 14.4, att: G, kind: "vidro" },
   ],
   accessPoints: [
-    { id: "rc1", name: "AP Recepção", x: 15, z: 5, y: 2.9, txPower: 22, band: 5 },
-    { id: "rc2", name: "AP Lobby", x: 16, z: 13.5, y: 2.9, txPower: 22, band: 5 },
-    { id: "rc3", name: "AP Lounge", x: 28, z: 15.5, y: 2.6, txPower: 18, band: 2.4 },
-    { id: "rc4", name: "AP Administração", x: 25, z: 3.5, y: 2.6, txPower: 18, band: 5 },
+    { id: "rc1", name: "AP Recepção", x: 10, z: 6.5, y: 3.1, txPower: 22, band: 5 },
+    { id: "rc2", name: "AP Foyer / Lounge", x: 9, z: 13.5, y: 3.1, txPower: 22, band: 5 },
+    { id: "rc3", name: "AP Poltronas", x: 6, z: 19, y: 2.8, txPower: 18, band: 2.4 },
+    { id: "rc4", name: "AP Circulação Hóspedes", x: 24, z: 12.2, y: 3.1, txPower: 22, band: 5 },
+    { id: "rc5", name: "AP Elevadores", x: 30, z: 16, y: 2.8, txPower: 18, band: 5 },
   ],
 };
 
@@ -171,56 +232,78 @@ const recepcao: FloorPlan = {
 /* 3. Centro de convenções                                             */
 /* ------------------------------------------------------------------ */
 
-const CONV_W = 46;
-const CONV_D = 32;
+const CONV_W = 56;
+const CONV_D = 30;
 
 const convencoes: FloorPlan = {
   id: "convencoes",
   name: "Centro de Convenções",
-  subtitle: "Salão principal, salas de reunião e coffee break",
+  subtitle: "Planta baixa detalhada 1:200",
   width: CONV_W,
   depth: CONV_D,
   wallHeight: 5.5,
   rooms: [
-    { name: "Sala de Reunião 01", x: 0.5, z: 1, w: 7, d: 5.5 },
-    { name: "Sala de Reunião 02", x: 0.5, z: 6.5, w: 7, d: 5.5 },
-    { name: "Sala de Reunião 03", x: 0.5, z: 12, w: 7, d: 5.5 },
-    { name: "Sala de Reunião 04", x: 0.5, z: 17.5, w: 7, d: 5.5 },
-    { name: "Palco", x: 15, z: 1, w: 14, d: 4 },
-    { name: "Salão Principal", x: 10, z: 5, w: 25, d: 12 },
-    { name: "Backstage", x: 35, z: 1, w: 10, d: 5 },
-    { name: "Sala Técnica", x: 35, z: 6, w: 10, d: 4 },
-    { name: "Depósito", x: 35, z: 10, w: 10, d: 4 },
-    { name: "Hall Principal", x: 9, z: 17, w: 20, d: 9 },
-    { name: "Banheiros", x: 29, z: 16, w: 6, d: 8 },
-    { name: "Área de Coffee Break", x: 35, z: 14, w: 10.5, d: 12 },
-    { name: "Entrada Principal", x: 15, z: 27, w: 12, d: 4 },
+    { name: "Banheiros Femininos", x: 0.7, z: 2.3, w: 5.8, d: 6 },
+    { name: "Banheiros Femininos", x: 0.5, z: 20.2, w: 6, d: 8.8 },
+    { name: "Banheiro Acessível", x: 7, z: 20.2, w: 5.7, d: 4.1 },
+    { name: "Salas de Reuniões", x: 7, z: 24.8, w: 5.7, d: 4.2 },
+    { name: "Recepção / Check-in", x: 4.2, z: 12.9, w: 6, d: 3.6 },
+    { name: "Foyer Amplo", x: 10.4, z: 2.3, w: 8.8, d: 14.7 },
+    { name: "Salão Principal para Eventos", x: 20.1, z: 0.6, w: 14, d: 14.9 },
+    { name: "Área de Apresentação", x: 35, z: 1.8, w: 8, d: 13.7 },
+    { name: "Palco", x: 35.6, z: 0.5, w: 7.4, d: 1.3 },
+    { name: "Auditório", x: 44.8, z: 2.2, w: 10.7, d: 10.2 },
+    { name: "Stage", x: 46.5, z: 0.8, w: 7.5, d: 1.4 },
+    { name: "Copa / Área de Apoio", x: 44.8, z: 13.2, w: 7.2, d: 2.8 },
+    { name: "Depósito", x: 52, z: 16, w: 3.7, d: 4.2 },
+    { name: "Área Administrativa", x: 22.1, z: 16.5, w: 12, d: 4.2 },
+    { name: "Sala de Organização de Eventos", x: 36, z: 16.5, w: 7.5, d: 4.2 },
+    { name: "Corredores de Circulação", x: 19.2, z: 21.2, w: 24.4, d: 1.6 },
+    { name: "Sala 1", x: 20.7, z: 23.1, w: 4.2, d: 5.8 },
+    { name: "Sala 2", x: 25.6, z: 23.1, w: 3.7, d: 5.8 },
+    { name: "Sala 3", x: 30.1, z: 23.1, w: 4.2, d: 5.8 },
+    { name: "Workshop A", x: 35.1, z: 23.1, w: 4.2, d: 5.8 },
+    { name: "Workshop B", x: 40, z: 23.1, w: 3.5, d: 5.8 },
+    { name: "Entrada Principal", x: 0.6, z: 13, w: 3, d: 3.4 },
   ],
   walls: [
-    ...box(0, 0, CONV_W, CONV_D, C, "concreto"),
-    ...box(0.5, 1, 7, 22, D, "drywall"),
-    { x1: 0.5, z1: 6.5, x2: 7.5, z2: 6.5, att: D, kind: "drywall" },
-    { x1: 0.5, z1: 12, x2: 7.5, z2: 12, att: D, kind: "drywall" },
-    { x1: 0.5, z1: 17.5, x2: 7.5, z2: 17.5, att: D, kind: "drywall" },
-    // salão principal
-    ...box(9, 1, 26, 16, C, "concreto"),
-    // bloco técnico / backstage
-    ...box(35, 1, 10, 13, C, "concreto"),
-    { x1: 35, z1: 6, x2: 45, z2: 6, att: D, kind: "drywall" },
-    { x1: 35, z1: 10, x2: 45, z2: 10, att: D, kind: "drywall" },
-    // banheiros
-    ...box(29, 16, 6, 8, D, "drywall"),
-    // coffee break
-    ...box(34.5, 14, 11, 12, G, "vidro"),
-    // fachada
-    { x1: 8, z1: 26.5, x2: 34, z2: 26.5, att: G, kind: "vidro" },
+    // envoltória do corpo principal
+    ...box(3.6, 0.4, 52.2, 20.2, C, "concreto"),
+    // ala oeste (banheiros / recepção)
+    ...box(0.4, 2, 6.4, 6.6, C, "concreto"),
+    { x1: 0.4, z1: 5, x2: 6.8, z2: 5, att: D, kind: "drywall" },
+    ...box(0.4, 19.8, 12.6, 9.4, C, "concreto"),
+    { x1: 6.6, z1: 19.8, x2: 6.6, z2: 29.2, att: D, kind: "drywall" },
+    { x1: 6.6, z1: 24.4, x2: 13, z2: 24.4, att: D, kind: "drywall" },
+    // foyer / salão
+    { x1: 19.6, z1: 0.4, x2: 19.6, z2: 20.6, att: C, kind: "concreto" },
+    { x1: 10, z1: 0.4, x2: 10, z2: 17.2, att: D, kind: "drywall" },
+    { x1: 3.6, z1: 17.2, x2: 19.6, z2: 17.2, att: D, kind: "drywall" },
+    // área de apresentação / palco
+    { x1: 34.6, z1: 0.4, x2: 34.6, z2: 15.8, att: C, kind: "concreto" },
+    { x1: 43.4, z1: 0.4, x2: 43.4, z2: 20.6, att: C, kind: "concreto" },
+    { x1: 34.6, z1: 15.8, x2: 43.4, z2: 15.8, att: D, kind: "drywall" },
+    // auditório e apoio
+    { x1: 44.4, z1: 12.8, x2: 55.8, z2: 12.8, att: C, kind: "concreto" },
+    { x1: 51.8, z1: 15.8, x2: 51.8, z2: 20.6, att: D, kind: "drywall" },
+    { x1: 44.4, z1: 15.8, x2: 55.8, z2: 15.8, att: D, kind: "drywall" },
+    // administração / organização
+    ...box(21.8, 16.2, 12.6, 4.4, D, "drywall"),
+    ...box(35.8, 16.2, 7.9, 4.4, D, "drywall"),
+    // ala sul de salas
+    ...box(19.2, 22.8, 25, 6.4, C, "concreto"),
+    { x1: 25.2, z1: 22.8, x2: 25.2, z2: 29.2, att: D, kind: "drywall" },
+    { x1: 29.6, z1: 22.8, x2: 29.6, z2: 29.2, att: D, kind: "drywall" },
+    { x1: 34.6, z1: 22.8, x2: 34.6, z2: 29.2, att: D, kind: "drywall" },
+    { x1: 39.6, z1: 22.8, x2: 39.6, z2: 29.2, att: D, kind: "drywall" },
   ],
   accessPoints: [
-    { id: "cv1", name: "AP Salão Norte", x: 16, z: 6, y: 5, txPower: 24, band: 5 },
-    { id: "cv2", name: "AP Salão Sul", x: 28, z: 14, y: 5, txPower: 24, band: 5 },
-    { id: "cv3", name: "AP Hall", x: 18, z: 21, y: 3.4, txPower: 22, band: 5 },
-    { id: "cv4", name: "AP Salas de Reunião", x: 4, z: 12, y: 2.8, txPower: 18, band: 2.4 },
-    { id: "cv5", name: "AP Coffee Break", x: 40, z: 20, y: 3, txPower: 18, band: 5 },
+    { id: "cv1", name: "AP Salão Principal", x: 27, z: 7, y: 5.2, txPower: 24, band: 5 },
+    { id: "cv2", name: "AP Área de Apresentação", x: 39, z: 8, y: 5.2, txPower: 24, band: 5 },
+    { id: "cv3", name: "AP Auditório", x: 50, z: 7, y: 5.2, txPower: 24, band: 5 },
+    { id: "cv4", name: "AP Foyer", x: 14, z: 9, y: 4, txPower: 22, band: 5 },
+    { id: "cv5", name: "AP Corredores", x: 31, z: 21.8, y: 3.2, txPower: 20, band: 5 },
+    { id: "cv6", name: "AP Salas de Workshop", x: 37, z: 26, y: 2.9, txPower: 18, band: 2.4 },
   ],
 };
 
@@ -234,84 +317,125 @@ const POOL_D = 40;
 const piscina: FloorPlan = {
   id: "piscina",
   name: "Piscina & Área de Lazer",
-  subtitle: "Deck, bar molhado e vestiários",
+  subtitle: "Piscina adulto, infantil, deck e quiosques",
   width: POOL_W,
   depth: POOL_D,
   wallHeight: 3,
   outdoor: true,
   rooms: [
-    { name: "Piscina Secundária", x: 16, z: 3, w: 20, d: 8 },
-    { name: "Piscina Principal", x: 11, z: 11, w: 27, d: 16 },
-    { name: "Piscina Infantil", x: 6, z: 26, w: 10, d: 6 },
-    { name: "Bar da Piscina", x: 41, z: 8, w: 15, d: 12 },
-    { name: "Vestiários", x: 48, z: 22, w: 10, d: 12 },
-    { name: "Banheiros", x: 40, z: 22, w: 8, d: 12 },
-    { name: "Deck / Solário", x: 2, z: 4, w: 8, d: 14 },
-    { name: "Jardins", x: 20, z: 32, w: 16, d: 6 },
+    { name: "Piscina Adulto", x: 14, z: 6, w: 28, d: 22 },
+    { name: "Piscina Infantil", x: 6, z: 24, w: 11, d: 9 },
+    { name: "Deck da Piscina", x: 24, z: 26, w: 22, d: 10 },
+    { name: "Bar da Piscina", x: 43, z: 8, w: 12, d: 9 },
+    { name: "Vestiários", x: 46, z: 19, w: 11, d: 7 },
+    { name: "Quiosques e Descanso", x: 30, z: 2, w: 20, d: 4 },
+    { name: "Jardins", x: 2, z: 2, w: 10, d: 16 },
+    { name: "Acesso ao Deck", x: 2, z: 34, w: 18, d: 4 },
   ],
   walls: [
-    ...box(41, 8, 15, 12, D, "drywall"),
-    ...box(40, 22, 18, 12, C, "concreto"),
-    { x1: 48, z1: 22, x2: 48, z2: 34, att: D, kind: "drywall" },
-    { x1: 40, z1: 28, x2: 48, z2: 28, att: D, kind: "drywall" },
+    ...box(43, 8, 12, 9, D, "drywall"),
+    ...box(46, 19, 11, 7, C, "concreto"),
+    { x1: 51.5, z1: 19, x2: 51.5, z2: 26, att: D, kind: "drywall" },
   ],
   accessPoints: [
-    { id: "ps1", name: "AP Deck Norte", x: 24, z: 8, y: 3.5, txPower: 22, band: 5 },
-    { id: "ps2", name: "AP Deck Sul", x: 22, z: 28, y: 3.5, txPower: 22, band: 2.4 },
-    { id: "ps3", name: "AP Bar da Piscina", x: 47, z: 14, y: 2.8, txPower: 18, band: 5 },
-    { id: "ps4", name: "AP Vestiários", x: 50, z: 27, y: 2.6, txPower: 16, band: 2.4 },
+    { id: "ps1", name: "AP Deck Norte", x: 26, z: 8, y: 3.5, txPower: 22, band: 5 },
+    { id: "ps2", name: "AP Deck Sul", x: 32, z: 30, y: 3.5, txPower: 22, band: 2.4 },
+    { id: "ps3", name: "AP Bar da Piscina", x: 48, z: 12, y: 2.8, txPower: 18, band: 5 },
+    { id: "ps4", name: "AP Vestiários", x: 51, z: 22, y: 2.6, txPower: 16, band: 2.4 },
   ],
 };
 
 /* ------------------------------------------------------------------ */
-/* 5. Andar de apartamentos                                            */
+/* 5. Andar de apartamentos (pavimento-tipo, 14 unidades)              */
 /* ------------------------------------------------------------------ */
 
-const APT_W = 56;
-const APT_D = 27;
-const aptTopNames = ["Apto 01", "Apto 02", "Apto 03", "Apto 04", "Apto 05"];
-const aptBottomNames = ["Apto 06", "Apto 07", "Apto 08", "Apto 09", "Apto 10"];
+const APT_W = 60;
+const APT_D = 28;
 
 const aptRooms: Room[] = [];
-const aptWalls: Wall[] = [...box(0, 0, APT_W, APT_D, C, "concreto")];
+const aptWalls: Wall[] = [];
 
-// fileira superior: 3 aptos à esquerda, hall de elevadores, 2 à direita
-const topSlots = [1, 8.6, 16.2, 31, 38.6];
-topSlots.forEach((x, i) => {
-  aptRooms.push({ name: aptTopNames[i]!, x, z: 1, w: 7, d: 10 });
-  aptWalls.push(...box(x, 1, 7, 10, D, "drywall"));
+// fileira norte: 9 unidades + sacadas
+const topLabels = [
+  "301-307",
+  "301-305",
+  "301-306",
+  "301-309",
+  "301-308",
+  "305-319",
+  "308-312",
+  "308-315",
+  "305-314",
+];
+const topW = 6.4;
+topLabels.forEach((name, i) => {
+  const x = 0.6 + i * (topW + 0.2);
+  aptRooms.push({ name, x, z: 2.6, w: topW, d: 10.6 });
+  aptWalls.push(...box(x, 2.6, topW, 10.6, D, "drywall"));
+  aptRooms.push({ name: "Sacada", x: x + 0.6, z: 0.4, w: topW - 1.2, d: 2 });
 });
-aptRooms.push({ name: "Hall Elevadores", x: 23.5, z: 1, w: 7, d: 10 });
-aptWalls.push(...box(23.5, 1, 7, 10, C, "concreto"));
+aptWalls.push({ x1: 0.6, z1: 2.6, x2: 58.8, z2: 2.6, att: C, kind: "concreto" });
 
-aptRooms.push({ name: "Corredor Central", x: 7, z: 11.5, w: 48, d: 3.5 });
+// corredor central
+aptRooms.push({ name: "Corredor de Circulação", x: 3.5, z: 13.6, w: 52, d: 2.4 });
 aptWalls.push(
-  { x1: 7, z1: 11.4, x2: APT_W, z2: 11.4, att: D, kind: "drywall" },
-  { x1: 7, z1: 15, x2: APT_W, z2: 15, att: D, kind: "drywall" },
+  { x1: 0.4, z1: 13.4, x2: 59.6, z2: 13.4, att: D, kind: "drywall" },
+  { x1: 0.4, z1: 16, x2: 59.6, z2: 16, att: D, kind: "drywall" },
 );
 
-const bottomSlots = [8.6, 17.5, 26.4, 35.3, 44.2];
-bottomSlots.forEach((x, i) => {
-  aptRooms.push({ name: aptBottomNames[i]!, x, z: 15.5, w: 8, d: 10.5 });
-  aptWalls.push(...box(x, 15.5, 8, 10.5, D, "drywall"));
-});
+// áreas técnicas nas pontas
+aptRooms.push({ name: "Área Técnica", x: 0.4, z: 13.6, w: 3, d: 2.4 });
+aptRooms.push({ name: "Área Técnica", x: 56.6, z: 13.6, w: 3, d: 2.4 });
 
-aptRooms.push({ name: "Escada 01", x: 0.5, z: 12, w: 6, d: 13 });
-aptWalls.push(...box(0.5, 12, 6, 13, C, "concreto"));
+// fileira sul: 2 unidades a oeste do núcleo
+const southWest = [
+  { name: "308-314", x: 4.5 },
+  { name: "301-312", x: 12.5 },
+];
+southWest.forEach(({ name, x }) => {
+  aptRooms.push({ name, x, z: 16.4, w: 7.6, d: 10.4 });
+  aptWalls.push(...box(x, 16.4, 7.6, 10.4, D, "drywall"));
+});
+aptRooms.push({ name: "Área Técnica", x: 0.4, z: 16.4, w: 3.8, d: 10.4 });
+aptWalls.push(...box(0.4, 16.4, 3.8, 10.4, C, "concreto"));
+
+// núcleo de circulação vertical
+aptRooms.push({ name: "Elevadores", x: 22, z: 16.4, w: 6, d: 5.2 });
+aptRooms.push({ name: "Mall do Elevador", x: 28.4, z: 16.4, w: 6.4, d: 5.2 });
+aptRooms.push({ name: "Escada de Incêndio", x: 28.4, z: 21.8, w: 6.4, d: 5 });
+aptRooms.push({ name: "Área Técnica de Serviço", x: 35.2, z: 16.4, w: 3.6, d: 10.4 });
+aptWalls.push(
+  ...box(21.6, 16.4, 17.4, 10.4, C, "concreto"),
+  { x1: 28.2, z1: 16.4, x2: 28.2, z2: 26.8, att: C, kind: "concreto" },
+  { x1: 28.2, z1: 21.6, x2: 34.8, z2: 21.6, att: C, kind: "concreto" },
+  { x1: 35, z1: 16.4, x2: 35, z2: 26.8, att: C, kind: "concreto" },
+);
+
+// fileira sul: 3 unidades a leste do núcleo
+const southEast = [
+  { name: "312-318", x: 39.4 },
+  { name: "312-320", x: 45.8 },
+  { name: "312-322", x: 52.2 },
+];
+southEast.forEach(({ name, x }) => {
+  aptRooms.push({ name, x, z: 16.4, w: 6, d: 10.4 });
+  aptWalls.push(...box(x, 16.4, 6, 10.4, D, "drywall"));
+});
 
 const apartamentos: FloorPlan = {
   id: "apartamentos",
   name: "Andar de Apartamentos",
-  subtitle: "Pavimento-tipo com 10 unidades",
+  subtitle: "Pavimento-tipo (3º andar) — 14 unidades · ~1.200 m²",
   width: APT_W,
   depth: APT_D,
   wallHeight: 2.7,
   rooms: aptRooms,
-  walls: aptWalls,
+  walls: [...box(0, 0, APT_W, APT_D, C, "concreto"), ...aptWalls],
   accessPoints: [
-    { id: "ap-corr-1", name: "AP Corredor Oeste", x: 15, z: 13.2, y: 2.5, txPower: 20, band: 5 },
-    { id: "ap-corr-2", name: "AP Corredor Leste", x: 42, z: 13.2, y: 2.5, txPower: 20, band: 5 },
-    { id: "ap-hall", name: "AP Hall Elevadores", x: 27, z: 6, y: 2.5, txPower: 18, band: 2.4 },
+    { id: "ap-corr-1", name: "AP Corredor Oeste", x: 12, z: 14.8, y: 2.5, txPower: 20, band: 5 },
+    { id: "ap-corr-2", name: "AP Corredor Centro", x: 30, z: 14.8, y: 2.5, txPower: 20, band: 5 },
+    { id: "ap-corr-3", name: "AP Corredor Leste", x: 48, z: 14.8, y: 2.5, txPower: 20, band: 5 },
+    { id: "ap-hall", name: "AP Mall do Elevador", x: 31, z: 19, y: 2.5, txPower: 18, band: 2.4 },
   ],
 };
 
