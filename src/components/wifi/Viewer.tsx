@@ -38,8 +38,11 @@ function roomStats(plan: FloorPlan, aps: AccessPoint[], band: number) {
 }
 
 export function Viewer() {
-  const [planId, setPlanId] = useState("recepcao");
+  const [planId, setPlanId] = useState("resort");
   const plan = useMemo(() => getPlan(planId), [planId]);
+  const [modeReq, setModeReq] = useState<"3d" | "wifi">("3d");
+  const mode: "3d" | "wifi" = plan.modelOnly ? "3d" : modeReq;
+  const wifi = mode === "wifi";
 
   const [band, setBand] = useState<number>(5);
   const [heat, setHeat] = useState(0.85);
@@ -64,7 +67,10 @@ export function Viewer() {
     () => plan.accessPoints.filter((a) => active.includes(a.id)),
     [plan, active],
   );
-  const stats = useMemo(() => roomStats(plan, aps, band), [plan, aps, band]);
+  const stats = useMemo(
+    () => (wifi ? roomStats(plan, aps, band) : []),
+    [plan, aps, band, wifi],
+  );
 
   const toggleAp = (id: string) =>
     setActive((cur) => (cur.includes(id) ? cur.filter((i) => i !== id) : [...cur, id]));
@@ -84,6 +90,7 @@ export function Viewer() {
           <Suspense fallback={null}>
             <Scene
               plan={plan}
+              mode={mode}
               band={band}
               heatmapOpacity={heat}
               wallOpacity={walls}
@@ -98,9 +105,12 @@ export function Viewer() {
         </Canvas>
 
         <div className="viewer-hint">
-          Arraste para orbitar · Scroll para zoom · Clique no piso para medir o sinal
+          {wifi
+            ? "Arraste para orbitar · Scroll para zoom · Clique no piso para medir o sinal"
+            : "Arraste para orbitar · Scroll para zoom · Maquete 3D do complexo"}
         </div>
 
+        {wifi && (
         <div className="legend">
           <span className="legend-title">RSSI</span>
           <div className="legend-bar" />
@@ -111,11 +121,14 @@ export function Viewer() {
             <span>-35 dBm</span>
           </div>
         </div>
+        )}
       </div>
 
       <aside className="viewer-panel">
         <header className="panel-head">
-          <span className="panel-eyebrow">Mapa de calor Wi-Fi</span>
+          <span className="panel-eyebrow">
+            {wifi ? "Mapa de calor Wi-Fi" : "Maquete 3D"}
+          </span>
           <h1>{plan.name}</h1>
           <p>{plan.subtitle}</p>
         </header>
@@ -135,6 +148,33 @@ export function Viewer() {
           </div>
         </section>
 
+        <section className="panel-block">
+          <h2>Modo de visualização</h2>
+          <div className="seg">
+            <button
+              onClick={() => setModeReq("3d")}
+              className={mode === "3d" ? "seg-btn seg-btn-on" : "seg-btn"}
+            >
+              Somente 3D
+            </button>
+            <button
+              onClick={() => setModeReq("wifi")}
+              disabled={plan.modelOnly}
+              className={mode === "wifi" ? "seg-btn seg-btn-on" : "seg-btn"}
+            >
+              Pontos de acesso
+            </button>
+          </div>
+          {plan.modelOnly && (
+            <p className="readout-note">
+              A vista geral do resort é apenas maquete 3D. Escolha outra planta para analisar o
+              Wi-Fi.
+            </p>
+          )}
+        </section>
+
+        {wifi && (
+        <>
         <section className="panel-block">
           <h2>Banda</h2>
           <div className="seg">
@@ -258,6 +298,8 @@ export function Viewer() {
             </tbody>
           </table>
         </section>
+        </>
+        )}
       </aside>
     </div>
   );
