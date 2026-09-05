@@ -174,7 +174,7 @@ function RoomLabels({ plan }: { plan: FloorPlan }) {
       {plan.rooms.map((r) => (
         <Text
           key={r.name}
-          position={[r.x + r.w / 2, 0.06, r.z + r.d / 2]}
+          position={[r.x + r.w / 2, 0.4, r.z + r.d / 2]}
           rotation-x={-Math.PI / 2}
           fontSize={size}
           color="#cfe6ef"
