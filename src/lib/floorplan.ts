@@ -31,6 +31,31 @@ export type AccessPoint = {
   band: 2.4 | 5 | 6;
 };
 
+/** Superfícies de piso desenhadas na planta (grama, água, areia, quadras...) */
+export type Surface = {
+  kind:
+    | "grama"
+    | "agua"
+    | "mar"
+    | "areia"
+    | "asfalto"
+    | "calcada"
+    | "deck"
+    | "quadra-azul"
+    | "quadra-verde"
+    | "telhado";
+  x: number;
+  z: number;
+  w: number;
+  d: number;
+  /** raio de arredondamento em metros (0 = retângulo) */
+  r?: number;
+};
+
+export type Tree = { x: number; z: number; s: number; kind: "palmeira" | "copa" };
+
+export type Building = { x: number; z: number; w: number; d: number; h: number; roof?: string };
+
 export type FloorPlan = {
   id: string;
   name: string;
@@ -41,9 +66,14 @@ export type FloorPlan = {
   depth: number;
   wallHeight: number;
   outdoor?: boolean;
+  /** Planta apenas maquete 3D (sem análise de Wi-Fi) */
+  modelOnly?: boolean;
   rooms: Room[];
   walls: Wall[];
   accessPoints: AccessPoint[];
+  surfaces?: Surface[];
+  trees?: Tree[];
+  buildings?: Building[];
 };
 
 const C = 12; // concreto
