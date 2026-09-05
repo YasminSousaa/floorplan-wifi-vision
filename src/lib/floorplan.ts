@@ -104,6 +104,65 @@ function box(
 const RESORT_W = 420;
 const RESORT_D = 290;
 
+/** Áreas onde não podem nascer árvores (edificações, piscinas, quadras, vias) */
+const RESORT_BLOCKED: Array<[number, number, number, number]> = [
+  [28, 9, 39, 62],
+  [85, 3, 74, 42],
+  [171, 3, 66, 42],
+  [87, 59, 71, 38],
+  [170, 59, 67, 38],
+  [104, 108, 61, 39],
+  [168, 108, 63, 39],
+  [104, 161, 61, 38],
+  [168, 161, 63, 38],
+  [246, 2, 55, 56],
+  [42, 87, 56, 110],
+  [97, 204, 103, 83],
+  [209, 204, 91, 83],
+  [294, 223, 81, 68],
+  [302, 4, 55, 68],
+  [228, 88, 86, 108],
+  [308, 96, 49, 49],
+  [308, 163, 58, 27],
+  [306, 198, 46, 37],
+  [4, 4, 26, 282],
+  [13, 200, 71, 87],
+  [366, 0, 54, RESORT_D],
+  [156, 4, 20, 284],
+  [292, 4, 18, 216],
+];
+
+function resortTrees(): Tree[] {
+  const trees: Tree[] = [];
+  let seed = 20240517;
+  const rnd = () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+  const free = (x: number, z: number) =>
+    !RESORT_BLOCKED.some(([bx, bz, bw, bd]) => x > bx - 3 && x < bx + bw + 3 && z > bz - 3 && z < bz + bd + 3);
+
+  // arborização geral dos jardins
+  for (let i = 0; i < 900 && trees.length < 260; i++) {
+    const x = 6 + rnd() * (366 - 12);
+    const z = 6 + rnd() * (RESORT_D - 12);
+    if (!free(x, z)) continue;
+    trees.push({ x, z, s: 0.75 + rnd() * 0.6, kind: rnd() > 0.55 ? "palmeira" : "copa" });
+  }
+  // fileira de coqueiros na praia
+  for (let z = 8; z < RESORT_D - 6; z += 11) {
+    trees.push({ x: 374 + rnd() * 6, z: z + rnd() * 3, s: 1 + rnd() * 0.35, kind: "palmeira" });
+  }
+  // coqueiros ao redor da piscina
+  const poolRing: Array<[number, number]> = [
+    [231, 96], [236, 154], [252, 88], [288, 92], [300, 108], [302, 140],
+    [292, 176], [262, 186], [240, 178], [226, 168], [222, 128], [226, 110],
+  ];
+  poolRing.forEach(([x, z]) => trees.push({ x, z, s: 1.05, kind: "palmeira" }));
+  return trees;
+}
+
+
 const resort: FloorPlan = {
   id: "resort",
   name: "Resort · Vista Geral",
