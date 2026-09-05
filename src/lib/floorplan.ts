@@ -154,35 +154,63 @@ const resort: FloorPlan = {
     // Leste
     { name: "Praia Privativa", x: 372, z: 10, w: 46, d: 270 },
   ],
-  walls: [
-    ...box(32, 13, 31, 54, C, "concreto"),
-    ...box(89, 7, 66, 34, C, "concreto"),
-    ...box(175, 7, 58, 34, C, "concreto"),
-    ...box(91, 63, 63, 30, C, "concreto"),
-    ...box(174, 63, 59, 30, C, "concreto"),
-    ...box(108, 112, 53, 31, C, "concreto"),
-    ...box(172, 112, 55, 31, C, "concreto"),
-    ...box(108, 165, 53, 30, C, "concreto"),
-    ...box(172, 165, 55, 30, C, "concreto"),
-    ...box(250, 6, 47, 48, C, "concreto"),
-    ...box(46, 91, 48, 102, C, "concreto"),
-    ...box(101, 208, 95, 75, C, "concreto"),
-    ...box(213, 208, 83, 75, C, "concreto"),
-    ...box(298, 227, 73, 60, C, "concreto"),
-    ...box(313, 100, 39, 39, G, "vidro"),
+  walls: [],
+  accessPoints: [],
+  modelOnly: true,
+  buildings: [
+    // serviço (noroeste)
+    { x: 32, z: 13, w: 31, d: 54, h: 7, roof: "#cbb79a" },
+    // blocos de hospedagem
+    { x: 89, z: 7, w: 66, d: 34, h: 15, roof: "#e2cfae" },
+    { x: 175, z: 7, w: 58, d: 34, h: 15, roof: "#e2cfae" },
+    { x: 91, z: 63, w: 63, d: 30, h: 15, roof: "#e2cfae" },
+    { x: 174, z: 63, w: 59, d: 30, h: 15, roof: "#e2cfae" },
+    { x: 108, z: 112, w: 53, d: 31, h: 15, roof: "#e2cfae" },
+    { x: 172, z: 112, w: 55, d: 31, h: 15, roof: "#e2cfae" },
+    { x: 108, z: 165, w: 53, d: 30, h: 15, roof: "#e2cfae" },
+    { x: 172, z: 165, w: 55, d: 30, h: 15, roof: "#e2cfae" },
+    // área de lazer / salão de jogos
+    { x: 250, z: 6, w: 47, d: 48, h: 9, roof: "#d9c7a8" },
+    // recepção / lobby
+    { x: 46, z: 91, w: 48, d: 102, h: 9, roof: "#efdcba" },
+    // eventos
+    { x: 101, z: 208, w: 95, d: 75, h: 11, roof: "#cfc6de" },
+    { x: 213, z: 208, w: 83, d: 75, h: 11, roof: "#cfc6de" },
+    // serviços de apoio (cozinha, refeitório, manutenção)
+    { x: 298, z: 227, w: 73, d: 60, h: 8, roof: "#c3d1de" },
+    // restaurantes
+    { x: 313, z: 100, w: 39, d: 39, h: 5, roof: "#d9a273" },
+    { x: 312, z: 202, w: 36, d: 29, h: 5, roof: "#d9a273" },
   ],
-  accessPoints: [
-    { id: "r-lobby", name: "AP Lobby Principal", x: 70, z: 160, y: 5, txPower: 24, band: 5 },
-    { id: "r-conv", name: "AP Centro de Convenções", x: 148, z: 245, y: 6, txPower: 26, band: 5 },
-    { id: "r-eventos", name: "AP Centro de Eventos", x: 254, z: 245, y: 6, txPower: 26, band: 5 },
-    { id: "r-pool", name: "AP Piscina", x: 265, z: 130, y: 5, txPower: 24, band: 2.4 },
-    { id: "r-b01", name: "AP Blocos 01–02", x: 165, z: 24, y: 8, txPower: 22, band: 5 },
-    { id: "r-b03", name: "AP Blocos 03–04", x: 164, z: 78, y: 8, txPower: 22, band: 5 },
-    { id: "r-b05", name: "AP Blocos 05–06", x: 166, z: 127, y: 8, txPower: 22, band: 5 },
-    { id: "r-b07", name: "AP Blocos 07–08", x: 166, z: 180, y: 8, txPower: 22, band: 5 },
-    { id: "r-quadras", name: "AP Quadras", x: 320, z: 45, y: 6, txPower: 22, band: 2.4 },
-    { id: "r-praia", name: "AP Praia", x: 372, z: 150, y: 6, txPower: 24, band: 2.4 },
+  surfaces: [
+    // base
+    { kind: "grama", x: 0, z: 0, w: 372, d: RESORT_D },
+    { kind: "areia", x: 366, z: 0, w: 34, d: RESORT_D },
+    { kind: "mar", x: 398, z: 0, w: 22, d: RESORT_D },
+    // via de acesso e estacionamento
+    { kind: "asfalto", x: 8, z: 8, w: 18, d: 274 },
+    { kind: "asfalto", x: 17, z: 204, w: 63, d: 79 },
+    { kind: "asfalto", x: 24, z: 118, w: 26, d: 20, r: 8 },
+    // circulações internas
+    { kind: "calcada", x: 84, z: 44, w: 210, d: 12 },
+    { kind: "calcada", x: 84, z: 96, w: 210, d: 12 },
+    { kind: "calcada", x: 84, z: 146, w: 140, d: 12 },
+    { kind: "calcada", x: 84, z: 196, w: 220, d: 10 },
+    { kind: "calcada", x: 160, z: 8, w: 12, d: 280 },
+    { kind: "calcada", x: 296, z: 8, w: 10, d: 210 },
+    // quadras
+    { kind: "quadra-azul", x: 306, z: 7, w: 47, d: 38 },
+    { kind: "quadra-verde", x: 306, z: 50, w: 47, d: 19 },
+    // piscinas e deck
+    { kind: "deck", x: 232, z: 92, w: 78, d: 100, r: 22 },
+    { kind: "agua", x: 240, z: 100, w: 50, d: 52, r: 20 },
+    { kind: "agua", x: 229, z: 147, w: 18, d: 19, r: 9 },
+    // quiosques / descanso
+    { kind: "deck", x: 316, z: 167, w: 46, d: 19, r: 6 },
+    { kind: "deck", x: 312, z: 202, w: 36, d: 29, r: 4 },
+    { kind: "deck", x: 313, z: 100, w: 39, d: 39, r: 4 },
   ],
+  trees: resortTrees(),
 };
 
 /* ------------------------------------------------------------------ */
