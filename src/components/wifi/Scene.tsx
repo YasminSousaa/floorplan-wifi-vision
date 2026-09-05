@@ -280,6 +280,7 @@ function Probe({
 
 export function Scene({
   plan,
+  mode,
   band,
   heatmapOpacity,
   wallOpacity,
@@ -291,6 +292,7 @@ export function Scene({
   onSelectAp,
 }: {
   plan: FloorPlan;
+  mode: "3d" | "wifi";
   band: number;
   heatmapOpacity: number;
   wallOpacity: number;
@@ -301,14 +303,17 @@ export function Scene({
   selectedAp: string | null;
   onSelectAp: (id: string) => void;
 }) {
+  const wifi = mode === "wifi";
   const aps = useMemo(
-    () => plan.accessPoints.filter((a) => activeAps.includes(a.id)),
-    [plan, activeAps],
+    () => (wifi ? plan.accessPoints.filter((a) => activeAps.includes(a.id)) : []),
+    [plan, activeAps, wifi],
   );
   const scale = Math.max(1, plan.width / 20);
   const span = Math.max(plan.width, plan.depth);
+  const sky = wifi ? "#070b14" : "#9fd4ea";
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    if (!wifi) return;
     e.stopPropagation();
     onProbe({
       x: THREE.MathUtils.clamp(e.point.x + plan.width / 2, 0.2, plan.width - 0.2),
@@ -318,12 +323,12 @@ export function Scene({
 
   return (
     <>
-      <color attach="background" args={["#070b14"]} />
-      <fog attach="fog" args={["#070b14", span * 1.6, span * 4.2]} />
-      <ambientLight intensity={0.45} />
+      <color attach="background" args={[sky]} />
+      <fog attach="fog" args={[sky, span * 1.6, span * 4.4]} />
+      <ambientLight intensity={wifi ? 0.45 : 0.75} />
       <directionalLight
         position={[span * 0.6, span, span * 0.5]}
-        intensity={1.5}
+        intensity={wifi ? 1.5 : 2.1}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -333,10 +338,10 @@ export function Scene({
         shadow-camera-bottom={-span}
       />
       <Environment>
-        <Lightformer intensity={1.6} position={[0, 8, 0]} scale={[14, 14, 1]} />
+        <Lightformer intensity={wifi ? 1.6 : 2.4} position={[0, 8, 0]} scale={[14, 14, 1]} />
         <Lightformer
           intensity={1}
-          color="#5ff0d0"
+          color={wifi ? "#5ff0d0" : "#cfe7f5"}
           position={[-8, 2, 2]}
           rotation-y={Math.PI / 2}
           scale={[20, 2, 1]}
@@ -353,21 +358,29 @@ export function Scene({
         >
           <planeGeometry args={[plan.width, plan.depth]} />
           <meshStandardMaterial
-            color={plan.outdoor ? "#101d1a" : "#141b28"}
+            color={wifi ? (plan.outdoor ? "#101d1a" : "#141b28") : plan.outdoor ? "#4d7a45" : "#efeae0"}
             roughness={0.95}
             metalness={0.05}
           />
         </mesh>
 
-        <gridHelper
-          args={[span, Math.min(80, Math.round(span)), "#22304a", "#182031"]}
-          position={[plan.width / 2, 0.015, plan.depth / 2]}
-        />
+        {wifi && (
+          <gridHelper
+            args={[span, Math.min(80, Math.round(span)), "#22304a", "#182031"]}
+            position={[plan.width / 2, 0.015, plan.depth / 2]}
+          />
+        )}
 
-        <Heatmap plan={plan} aps={aps} band={band} opacity={heatmapOpacity} height={0.04} />
+        {!wifi && <Surfaces plan={plan} />}
+        {!wifi && <Buildings plan={plan} />}
+        {!wifi && <Trees plan={plan} />}
+
+        {wifi && (
+          <Heatmap plan={plan} aps={aps} band={band} opacity={heatmapOpacity} height={0.04} />
+        )}
 
         {showLabels && <RoomLabels plan={plan} />}
-        <Walls plan={plan} opacity={wallOpacity} />
+        <Walls plan={plan} opacity={wifi ? wallOpacity : 1} />
 
         {aps.map((ap) => (
           <ApMarker
@@ -379,7 +392,9 @@ export function Scene({
           />
         ))}
 
-        {probe && <Probe plan={plan} point={probe} aps={aps} band={band} scale={scale} />}
+        {wifi && probe && (
+          <Probe plan={plan} point={probe} aps={aps} band={band} scale={scale} />
+        )}
       </group>
 
       <OrbitControls
