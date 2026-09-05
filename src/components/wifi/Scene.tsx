@@ -1,4 +1,12 @@
-import { Environment, Html, Lightformer, OrbitControls, Text } from "@react-three/drei";
+import {
+  Environment,
+  Html,
+  Instance,
+  Instances,
+  Lightformer,
+  OrbitControls,
+  Text,
+} from "@react-three/drei";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -8,8 +16,122 @@ import {
   quality,
   type AccessPoint,
   type FloorPlan,
+  type Surface,
 } from "@/lib/floorplan";
 import { Heatmap } from "./Heatmap";
+
+const SURFACE_STYLE: Record<
+  Surface["kind"],
+  { color: string; rough: number; metal: number; y: number }
+> = {
+  grama: { color: "#4d7a45", rough: 1, metal: 0, y: 0.02 },
+  areia: { color: "#e3d3a6", rough: 1, metal: 0, y: 0.04 },
+  mar: { color: "#2f93bb", rough: 0.15, metal: 0.35, y: 0.03 },
+  asfalto: { color: "#63676f", rough: 0.95, metal: 0, y: 0.06 },
+  calcada: { color: "#cdc4ae", rough: 0.95, metal: 0, y: 0.07 },
+  deck: { color: "#a9764a", rough: 0.8, metal: 0, y: 0.09 },
+  "quadra-azul": { color: "#3d7cc4", rough: 0.9, metal: 0, y: 0.1 },
+  "quadra-verde": { color: "#3f8f5a", rough: 0.9, metal: 0, y: 0.1 },
+  agua: { color: "#3fb9dd", rough: 0.08, metal: 0.4, y: 0.14 },
+  telhado: { color: "#d9c7a8", rough: 0.9, metal: 0, y: 0.12 },
+};
+
+function roundedGeometry(w: number, d: number, r: number) {
+  const rad = Math.min(r, w / 2, d / 2);
+  const s = new THREE.Shape();
+  s.moveTo(-w / 2 + rad, -d / 2);
+  s.lineTo(w / 2 - rad, -d / 2);
+  s.quadraticCurveTo(w / 2, -d / 2, w / 2, -d / 2 + rad);
+  s.lineTo(w / 2, d / 2 - rad);
+  s.quadraticCurveTo(w / 2, d / 2, w / 2 - rad, d / 2);
+  s.lineTo(-w / 2 + rad, d / 2);
+  s.quadraticCurveTo(-w / 2, d / 2, -w / 2, d / 2 - rad);
+  s.lineTo(-w / 2, -d / 2 + rad);
+  s.quadraticCurveTo(-w / 2, -d / 2, -w / 2, -d / 2 + rad);
+  return new THREE.ShapeGeometry(s, 16);
+}
+
+function Surfaces({ plan }: { plan: FloorPlan }) {
+  const items = plan.surfaces ?? [];
+  return (
+    <group>
+      {items.map((s, i) => {
+        const st = SURFACE_STYLE[s.kind];
+        return (
+          <mesh
+            key={i}
+            receiveShadow
+            rotation-x={-Math.PI / 2}
+            position={[s.x + s.w / 2, st.y + i * 0.004, s.z + s.d / 2]}
+            geometry={s.r ? roundedGeometry(s.w, s.d, s.r) : undefined}
+          >
+            {!s.r && <planeGeometry args={[s.w, s.d]} />}
+            <meshStandardMaterial color={st.color} roughness={st.rough} metalness={st.metal} />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+function Buildings({ plan }: { plan: FloorPlan }) {
+  const items = plan.buildings ?? [];
+  return (
+    <group>
+      {items.map((b, i) => (
+        <group key={i} position={[b.x + b.w / 2, 0, b.z + b.d / 2]}>
+          <mesh castShadow receiveShadow position={[0, b.h / 2, 0]}>
+            <boxGeometry args={[b.w, b.h, b.d]} />
+            <meshStandardMaterial color="#e7ded0" roughness={0.85} />
+          </mesh>
+          <mesh castShadow position={[0, b.h + 0.5, 0]}>
+            <boxGeometry args={[b.w + 1.2, 1, b.d + 1.2]} />
+            <meshStandardMaterial color={b.roof ?? "#d8c8ab"} roughness={0.9} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function Trees({ plan }: { plan: FloorPlan }) {
+  const trees = plan.trees ?? [];
+  const palms = trees.filter((t) => t.kind === "palmeira");
+  const tops = trees.filter((t) => t.kind === "copa");
+  if (!trees.length) return null;
+  return (
+    <group>
+      <Instances limit={trees.length} castShadow>
+        <cylinderGeometry args={[0.22, 0.38, 6, 6]} />
+        <meshStandardMaterial color="#7d5a3a" roughness={1} />
+        {trees.map((t, i) => (
+          <Instance key={i} position={[t.x, 3 * t.s, t.z]} scale={[t.s, t.s, t.s]} />
+        ))}
+      </Instances>
+
+      <Instances limit={Math.max(1, palms.length)} castShadow>
+        <sphereGeometry args={[2.6, 8, 6]} />
+        <meshStandardMaterial color="#3f7d3f" roughness={0.95} />
+        {palms.map((t, i) => (
+          <Instance
+            key={i}
+            position={[t.x, 6.4 * t.s, t.z]}
+            scale={[t.s * 1.25, t.s * 0.55, t.s * 1.25]}
+          />
+        ))}
+      </Instances>
+
+      <Instances limit={Math.max(1, tops.length)} castShadow>
+        <coneGeometry args={[3, 6, 7]} />
+        <meshStandardMaterial color="#356b39" roughness={0.95} />
+        {tops.map((t, i) => (
+          <Instance key={i} position={[t.x, 8 * t.s, t.z]} scale={[t.s, t.s, t.s]} />
+        ))}
+      </Instances>
+    </group>
+  );
+}
+
 
 function Walls({ plan, opacity }: { plan: FloorPlan; opacity: number }) {
   const thickness = Math.max(0.16, plan.width / 180);
