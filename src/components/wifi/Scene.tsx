@@ -63,9 +63,8 @@ function Surfaces({ plan }: { plan: FloorPlan }) {
             receiveShadow
             rotation-x={-Math.PI / 2}
             position={[s.x + s.w / 2, st.y + i * 0.004, s.z + s.d / 2]}
-            geometry={s.r ? roundedGeometry(s.w, s.d, s.r) : undefined}
+            geometry={roundedGeometry(s.w, s.d, s.r ?? 0.001)}
           >
-            {!s.r && <planeGeometry args={[s.w, s.d]} />}
             <meshStandardMaterial color={st.color} roughness={st.rough} metalness={st.metal} />
           </mesh>
         );
