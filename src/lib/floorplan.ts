@@ -31,6 +31,31 @@ export type AccessPoint = {
   band: 2.4 | 5 | 6;
 };
 
+/** Superfícies de piso desenhadas na planta (grama, água, areia, quadras...) */
+export type Surface = {
+  kind:
+    | "grama"
+    | "agua"
+    | "mar"
+    | "areia"
+    | "asfalto"
+    | "calcada"
+    | "deck"
+    | "quadra-azul"
+    | "quadra-verde"
+    | "telhado";
+  x: number;
+  z: number;
+  w: number;
+  d: number;
+  /** raio de arredondamento em metros (0 = retângulo) */
+  r?: number;
+};
+
+export type Tree = { x: number; z: number; s: number; kind: "palmeira" | "copa" };
+
+export type Building = { x: number; z: number; w: number; d: number; h: number; roof?: string };
+
 export type FloorPlan = {
   id: string;
   name: string;
@@ -41,9 +66,14 @@ export type FloorPlan = {
   depth: number;
   wallHeight: number;
   outdoor?: boolean;
+  /** Planta apenas maquete 3D (sem análise de Wi-Fi) */
+  modelOnly?: boolean;
   rooms: Room[];
   walls: Wall[];
   accessPoints: AccessPoint[];
+  surfaces?: Surface[];
+  trees?: Tree[];
+  buildings?: Building[];
 };
 
 const C = 12; // concreto
@@ -73,6 +103,65 @@ function box(
 
 const RESORT_W = 420;
 const RESORT_D = 290;
+
+/** Áreas onde não podem nascer árvores (edificações, piscinas, quadras, vias) */
+const RESORT_BLOCKED: Array<[number, number, number, number]> = [
+  [28, 9, 39, 62],
+  [85, 3, 74, 42],
+  [171, 3, 66, 42],
+  [87, 59, 71, 38],
+  [170, 59, 67, 38],
+  [104, 108, 61, 39],
+  [168, 108, 63, 39],
+  [104, 161, 61, 38],
+  [168, 161, 63, 38],
+  [246, 2, 55, 56],
+  [42, 87, 56, 110],
+  [97, 204, 103, 83],
+  [209, 204, 91, 83],
+  [294, 223, 81, 68],
+  [302, 4, 55, 68],
+  [228, 88, 86, 108],
+  [308, 96, 49, 49],
+  [308, 163, 58, 27],
+  [306, 198, 46, 37],
+  [4, 4, 26, 282],
+  [13, 200, 71, 87],
+  [366, 0, 54, RESORT_D],
+  [156, 4, 20, 284],
+  [292, 4, 18, 216],
+];
+
+function resortTrees(): Tree[] {
+  const trees: Tree[] = [];
+  let seed = 20240517;
+  const rnd = () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+  const free = (x: number, z: number) =>
+    !RESORT_BLOCKED.some(([bx, bz, bw, bd]) => x > bx - 3 && x < bx + bw + 3 && z > bz - 3 && z < bz + bd + 3);
+
+  // arborização geral dos jardins
+  for (let i = 0; i < 900 && trees.length < 260; i++) {
+    const x = 6 + rnd() * (366 - 12);
+    const z = 6 + rnd() * (RESORT_D - 12);
+    if (!free(x, z)) continue;
+    trees.push({ x, z, s: 0.75 + rnd() * 0.6, kind: rnd() > 0.55 ? "palmeira" : "copa" });
+  }
+  // fileira de coqueiros na praia
+  for (let z = 8; z < RESORT_D - 6; z += 11) {
+    trees.push({ x: 374 + rnd() * 6, z: z + rnd() * 3, s: 1 + rnd() * 0.35, kind: "palmeira" });
+  }
+  // coqueiros ao redor da piscina
+  const poolRing: Array<[number, number]> = [
+    [231, 96], [236, 154], [252, 88], [288, 92], [300, 108], [302, 140],
+    [292, 176], [262, 186], [240, 178], [226, 168], [222, 128], [226, 110],
+  ];
+  poolRing.forEach(([x, z]) => trees.push({ x, z, s: 1.05, kind: "palmeira" }));
+  return trees;
+}
+
 
 const resort: FloorPlan = {
   id: "resort",
@@ -124,35 +213,63 @@ const resort: FloorPlan = {
     // Leste
     { name: "Praia Privativa", x: 372, z: 10, w: 46, d: 270 },
   ],
-  walls: [
-    ...box(32, 13, 31, 54, C, "concreto"),
-    ...box(89, 7, 66, 34, C, "concreto"),
-    ...box(175, 7, 58, 34, C, "concreto"),
-    ...box(91, 63, 63, 30, C, "concreto"),
-    ...box(174, 63, 59, 30, C, "concreto"),
-    ...box(108, 112, 53, 31, C, "concreto"),
-    ...box(172, 112, 55, 31, C, "concreto"),
-    ...box(108, 165, 53, 30, C, "concreto"),
-    ...box(172, 165, 55, 30, C, "concreto"),
-    ...box(250, 6, 47, 48, C, "concreto"),
-    ...box(46, 91, 48, 102, C, "concreto"),
-    ...box(101, 208, 95, 75, C, "concreto"),
-    ...box(213, 208, 83, 75, C, "concreto"),
-    ...box(298, 227, 73, 60, C, "concreto"),
-    ...box(313, 100, 39, 39, G, "vidro"),
+  walls: [],
+  accessPoints: [],
+  modelOnly: true,
+  buildings: [
+    // serviço (noroeste)
+    { x: 32, z: 13, w: 31, d: 54, h: 7, roof: "#cbb79a" },
+    // blocos de hospedagem
+    { x: 89, z: 7, w: 66, d: 34, h: 15, roof: "#e2cfae" },
+    { x: 175, z: 7, w: 58, d: 34, h: 15, roof: "#e2cfae" },
+    { x: 91, z: 63, w: 63, d: 30, h: 15, roof: "#e2cfae" },
+    { x: 174, z: 63, w: 59, d: 30, h: 15, roof: "#e2cfae" },
+    { x: 108, z: 112, w: 53, d: 31, h: 15, roof: "#e2cfae" },
+    { x: 172, z: 112, w: 55, d: 31, h: 15, roof: "#e2cfae" },
+    { x: 108, z: 165, w: 53, d: 30, h: 15, roof: "#e2cfae" },
+    { x: 172, z: 165, w: 55, d: 30, h: 15, roof: "#e2cfae" },
+    // área de lazer / salão de jogos
+    { x: 250, z: 6, w: 47, d: 48, h: 9, roof: "#d9c7a8" },
+    // recepção / lobby
+    { x: 46, z: 91, w: 48, d: 102, h: 9, roof: "#efdcba" },
+    // eventos
+    { x: 101, z: 208, w: 95, d: 75, h: 11, roof: "#cfc6de" },
+    { x: 213, z: 208, w: 83, d: 75, h: 11, roof: "#cfc6de" },
+    // serviços de apoio (cozinha, refeitório, manutenção)
+    { x: 298, z: 227, w: 73, d: 60, h: 8, roof: "#c3d1de" },
+    // restaurantes
+    { x: 313, z: 100, w: 39, d: 39, h: 5, roof: "#d9a273" },
+    { x: 312, z: 202, w: 36, d: 29, h: 5, roof: "#d9a273" },
   ],
-  accessPoints: [
-    { id: "r-lobby", name: "AP Lobby Principal", x: 70, z: 160, y: 5, txPower: 24, band: 5 },
-    { id: "r-conv", name: "AP Centro de Convenções", x: 148, z: 245, y: 6, txPower: 26, band: 5 },
-    { id: "r-eventos", name: "AP Centro de Eventos", x: 254, z: 245, y: 6, txPower: 26, band: 5 },
-    { id: "r-pool", name: "AP Piscina", x: 265, z: 130, y: 5, txPower: 24, band: 2.4 },
-    { id: "r-b01", name: "AP Blocos 01–02", x: 165, z: 24, y: 8, txPower: 22, band: 5 },
-    { id: "r-b03", name: "AP Blocos 03–04", x: 164, z: 78, y: 8, txPower: 22, band: 5 },
-    { id: "r-b05", name: "AP Blocos 05–06", x: 166, z: 127, y: 8, txPower: 22, band: 5 },
-    { id: "r-b07", name: "AP Blocos 07–08", x: 166, z: 180, y: 8, txPower: 22, band: 5 },
-    { id: "r-quadras", name: "AP Quadras", x: 320, z: 45, y: 6, txPower: 22, band: 2.4 },
-    { id: "r-praia", name: "AP Praia", x: 372, z: 150, y: 6, txPower: 24, band: 2.4 },
+  surfaces: [
+    // base
+    { kind: "grama", x: 0, z: 0, w: 372, d: RESORT_D },
+    { kind: "areia", x: 366, z: 0, w: 34, d: RESORT_D },
+    { kind: "mar", x: 398, z: 0, w: 22, d: RESORT_D },
+    // via de acesso e estacionamento
+    { kind: "asfalto", x: 8, z: 8, w: 18, d: 274 },
+    { kind: "asfalto", x: 17, z: 204, w: 63, d: 79 },
+    { kind: "asfalto", x: 24, z: 118, w: 26, d: 20, r: 8 },
+    // circulações internas
+    { kind: "calcada", x: 84, z: 44, w: 210, d: 12 },
+    { kind: "calcada", x: 84, z: 96, w: 210, d: 12 },
+    { kind: "calcada", x: 84, z: 146, w: 140, d: 12 },
+    { kind: "calcada", x: 84, z: 196, w: 220, d: 10 },
+    { kind: "calcada", x: 160, z: 8, w: 12, d: 280 },
+    { kind: "calcada", x: 296, z: 8, w: 10, d: 210 },
+    // quadras
+    { kind: "quadra-azul", x: 306, z: 7, w: 47, d: 38 },
+    { kind: "quadra-verde", x: 306, z: 50, w: 47, d: 19 },
+    // piscinas e deck
+    { kind: "deck", x: 232, z: 92, w: 78, d: 100, r: 22 },
+    { kind: "agua", x: 240, z: 100, w: 50, d: 52, r: 20 },
+    { kind: "agua", x: 229, z: 147, w: 18, d: 19, r: 9 },
+    // quiosques / descanso
+    { kind: "deck", x: 316, z: 167, w: 46, d: 19, r: 6 },
+    { kind: "deck", x: 312, z: 202, w: 36, d: 29, r: 4 },
+    { kind: "deck", x: 313, z: 100, w: 39, d: 39, r: 4 },
   ],
+  trees: resortTrees(),
 };
 
 /* ------------------------------------------------------------------ */

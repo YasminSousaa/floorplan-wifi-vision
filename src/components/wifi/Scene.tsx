@@ -1,4 +1,12 @@
-import { Environment, Html, Lightformer, OrbitControls, Text } from "@react-three/drei";
+import {
+  Environment,
+  Html,
+  Instance,
+  Instances,
+  Lightformer,
+  OrbitControls,
+  Text,
+} from "@react-three/drei";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -8,8 +16,121 @@ import {
   quality,
   type AccessPoint,
   type FloorPlan,
+  type Surface,
 } from "@/lib/floorplan";
 import { Heatmap } from "./Heatmap";
+
+const SURFACE_STYLE: Record<
+  Surface["kind"],
+  { color: string; rough: number; metal: number; y: number }
+> = {
+  grama: { color: "#4d7a45", rough: 1, metal: 0, y: 0.02 },
+  areia: { color: "#e3d3a6", rough: 1, metal: 0, y: 0.04 },
+  mar: { color: "#2f93bb", rough: 0.15, metal: 0.35, y: 0.03 },
+  asfalto: { color: "#63676f", rough: 0.95, metal: 0, y: 0.06 },
+  calcada: { color: "#cdc4ae", rough: 0.95, metal: 0, y: 0.07 },
+  deck: { color: "#a9764a", rough: 0.8, metal: 0, y: 0.09 },
+  "quadra-azul": { color: "#3d7cc4", rough: 0.9, metal: 0, y: 0.1 },
+  "quadra-verde": { color: "#3f8f5a", rough: 0.9, metal: 0, y: 0.1 },
+  agua: { color: "#3fb9dd", rough: 0.08, metal: 0.4, y: 0.14 },
+  telhado: { color: "#d9c7a8", rough: 0.9, metal: 0, y: 0.12 },
+};
+
+function roundedGeometry(w: number, d: number, r: number) {
+  const rad = Math.min(r, w / 2, d / 2);
+  const s = new THREE.Shape();
+  s.moveTo(-w / 2 + rad, -d / 2);
+  s.lineTo(w / 2 - rad, -d / 2);
+  s.quadraticCurveTo(w / 2, -d / 2, w / 2, -d / 2 + rad);
+  s.lineTo(w / 2, d / 2 - rad);
+  s.quadraticCurveTo(w / 2, d / 2, w / 2 - rad, d / 2);
+  s.lineTo(-w / 2 + rad, d / 2);
+  s.quadraticCurveTo(-w / 2, d / 2, -w / 2, d / 2 - rad);
+  s.lineTo(-w / 2, -d / 2 + rad);
+  s.quadraticCurveTo(-w / 2, -d / 2, -w / 2, -d / 2 + rad);
+  return new THREE.ShapeGeometry(s, 16);
+}
+
+function Surfaces({ plan }: { plan: FloorPlan }) {
+  const items = plan.surfaces ?? [];
+  return (
+    <group>
+      {items.map((s, i) => {
+        const st = SURFACE_STYLE[s.kind];
+        return (
+          <mesh
+            key={i}
+            receiveShadow
+            rotation-x={-Math.PI / 2}
+            position={[s.x + s.w / 2, st.y + i * 0.004, s.z + s.d / 2]}
+            geometry={roundedGeometry(s.w, s.d, s.r ?? 0.001)}
+          >
+            <meshStandardMaterial color={st.color} roughness={st.rough} metalness={st.metal} />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+function Buildings({ plan }: { plan: FloorPlan }) {
+  const items = plan.buildings ?? [];
+  return (
+    <group>
+      {items.map((b, i) => (
+        <group key={i} position={[b.x + b.w / 2, 0, b.z + b.d / 2]}>
+          <mesh castShadow receiveShadow position={[0, b.h / 2, 0]}>
+            <boxGeometry args={[b.w, b.h, b.d]} />
+            <meshStandardMaterial color="#e7ded0" roughness={0.85} />
+          </mesh>
+          <mesh castShadow position={[0, b.h + 0.5, 0]}>
+            <boxGeometry args={[b.w + 1.2, 1, b.d + 1.2]} />
+            <meshStandardMaterial color={b.roof ?? "#d8c8ab"} roughness={0.9} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
+
+function Trees({ plan }: { plan: FloorPlan }) {
+  const trees = plan.trees ?? [];
+  const palms = trees.filter((t) => t.kind === "palmeira");
+  const tops = trees.filter((t) => t.kind === "copa");
+  if (!trees.length) return null;
+  return (
+    <group>
+      <Instances limit={trees.length} castShadow>
+        <cylinderGeometry args={[0.22, 0.38, 6, 6]} />
+        <meshStandardMaterial color="#7d5a3a" roughness={1} />
+        {trees.map((t, i) => (
+          <Instance key={i} position={[t.x, 3 * t.s, t.z]} scale={[t.s, t.s, t.s]} />
+        ))}
+      </Instances>
+
+      <Instances limit={Math.max(1, palms.length)} castShadow>
+        <sphereGeometry args={[2.6, 8, 6]} />
+        <meshStandardMaterial color="#3f7d3f" roughness={0.95} />
+        {palms.map((t, i) => (
+          <Instance
+            key={i}
+            position={[t.x, 6.4 * t.s, t.z]}
+            scale={[t.s * 1.25, t.s * 0.55, t.s * 1.25]}
+          />
+        ))}
+      </Instances>
+
+      <Instances limit={Math.max(1, tops.length)} castShadow>
+        <coneGeometry args={[3, 6, 7]} />
+        <meshStandardMaterial color="#356b39" roughness={0.95} />
+        {tops.map((t, i) => (
+          <Instance key={i} position={[t.x, 8 * t.s, t.z]} scale={[t.s, t.s, t.s]} />
+        ))}
+      </Instances>
+    </group>
+  );
+}
+
 
 function Walls({ plan, opacity }: { plan: FloorPlan; opacity: number }) {
   const thickness = Math.max(0.16, plan.width / 180);
@@ -52,7 +173,7 @@ function RoomLabels({ plan }: { plan: FloorPlan }) {
       {plan.rooms.map((r) => (
         <Text
           key={r.name}
-          position={[r.x + r.w / 2, 0.06, r.z + r.d / 2]}
+          position={[r.x + r.w / 2, 0.4, r.z + r.d / 2]}
           rotation-x={-Math.PI / 2}
           fontSize={size}
           color="#cfe6ef"
@@ -158,6 +279,7 @@ function Probe({
 
 export function Scene({
   plan,
+  mode,
   band,
   heatmapOpacity,
   wallOpacity,
@@ -169,6 +291,7 @@ export function Scene({
   onSelectAp,
 }: {
   plan: FloorPlan;
+  mode: "3d" | "wifi";
   band: number;
   heatmapOpacity: number;
   wallOpacity: number;
@@ -179,14 +302,17 @@ export function Scene({
   selectedAp: string | null;
   onSelectAp: (id: string) => void;
 }) {
+  const wifi = mode === "wifi";
   const aps = useMemo(
-    () => plan.accessPoints.filter((a) => activeAps.includes(a.id)),
-    [plan, activeAps],
+    () => (wifi ? plan.accessPoints.filter((a) => activeAps.includes(a.id)) : []),
+    [plan, activeAps, wifi],
   );
   const scale = Math.max(1, plan.width / 20);
   const span = Math.max(plan.width, plan.depth);
+  const sky = wifi ? "#070b14" : "#9fd4ea";
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    if (!wifi) return;
     e.stopPropagation();
     onProbe({
       x: THREE.MathUtils.clamp(e.point.x + plan.width / 2, 0.2, plan.width - 0.2),
@@ -196,12 +322,12 @@ export function Scene({
 
   return (
     <>
-      <color attach="background" args={["#070b14"]} />
-      <fog attach="fog" args={["#070b14", span * 1.6, span * 4.2]} />
-      <ambientLight intensity={0.45} />
+      <color attach="background" args={[sky]} />
+      <fog attach="fog" args={[sky, span * 1.6, span * 4.4]} />
+      <ambientLight intensity={wifi ? 0.45 : 0.75} />
       <directionalLight
         position={[span * 0.6, span, span * 0.5]}
-        intensity={1.5}
+        intensity={wifi ? 1.5 : 2.1}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -211,10 +337,10 @@ export function Scene({
         shadow-camera-bottom={-span}
       />
       <Environment>
-        <Lightformer intensity={1.6} position={[0, 8, 0]} scale={[14, 14, 1]} />
+        <Lightformer intensity={wifi ? 1.6 : 2.4} position={[0, 8, 0]} scale={[14, 14, 1]} />
         <Lightformer
           intensity={1}
-          color="#5ff0d0"
+          color={wifi ? "#5ff0d0" : "#cfe7f5"}
           position={[-8, 2, 2]}
           rotation-y={Math.PI / 2}
           scale={[20, 2, 1]}
@@ -231,21 +357,29 @@ export function Scene({
         >
           <planeGeometry args={[plan.width, plan.depth]} />
           <meshStandardMaterial
-            color={plan.outdoor ? "#101d1a" : "#141b28"}
+            color={wifi ? (plan.outdoor ? "#101d1a" : "#141b28") : plan.outdoor ? "#4d7a45" : "#efeae0"}
             roughness={0.95}
             metalness={0.05}
           />
         </mesh>
 
-        <gridHelper
-          args={[span, Math.min(80, Math.round(span)), "#22304a", "#182031"]}
-          position={[plan.width / 2, 0.015, plan.depth / 2]}
-        />
+        {wifi && (
+          <gridHelper
+            args={[span, Math.min(80, Math.round(span)), "#22304a", "#182031"]}
+            position={[plan.width / 2, 0.015, plan.depth / 2]}
+          />
+        )}
 
-        <Heatmap plan={plan} aps={aps} band={band} opacity={heatmapOpacity} height={0.04} />
+        {!wifi && <Surfaces plan={plan} />}
+        {!wifi && <Buildings plan={plan} />}
+        {!wifi && <Trees plan={plan} />}
+
+        {wifi && (
+          <Heatmap plan={plan} aps={aps} band={band} opacity={heatmapOpacity} height={0.04} />
+        )}
 
         {showLabels && <RoomLabels plan={plan} />}
-        <Walls plan={plan} opacity={wallOpacity} />
+        <Walls plan={plan} opacity={wifi ? wallOpacity : 1} />
 
         {aps.map((ap) => (
           <ApMarker
@@ -257,7 +391,9 @@ export function Scene({
           />
         ))}
 
-        {probe && <Probe plan={plan} point={probe} aps={aps} band={band} scale={scale} />}
+        {wifi && probe && (
+          <Probe plan={plan} point={probe} aps={aps} band={band} scale={scale} />
+        )}
       </group>
 
       <OrbitControls
