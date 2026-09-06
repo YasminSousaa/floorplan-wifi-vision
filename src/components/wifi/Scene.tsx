@@ -131,6 +131,228 @@ function Trees({ plan }: { plan: FloorPlan }) {
   );
 }
 
+function Pool({ x, z, w, d, radius }: { x: number; z: number; w: number; d: number; radius: number }) {
+  const water = useMemo(() => roundedGeometry(w, d, radius), [w, d, radius]);
+  const coping = useMemo(() => roundedGeometry(w + 1.6, d + 1.6, radius + 0.8), [w, d, radius]);
+  return (
+    <group position={[x + w / 2, 0, z + d / 2]}>
+      <mesh rotation-x={-Math.PI / 2} position-y={0.13} receiveShadow geometry={coping}>
+        <meshStandardMaterial color="#e9e3d7" roughness={0.78} />
+      </mesh>
+      <mesh rotation-x={-Math.PI / 2} position-y={0.18} geometry={water}>
+        <meshPhysicalMaterial
+          color="#38b9d4"
+          roughness={0.08}
+          metalness={0.08}
+          transmission={0.16}
+          transparent
+          opacity={0.88}
+          clearcoat={1}
+          clearcoatRoughness={0.1}
+        />
+      </mesh>
+      <mesh position={[w * 0.36, 0.32, 0]} castShadow>
+        <boxGeometry args={[0.12, 0.65, Math.min(2.8, d * 0.2)]} />
+        <meshStandardMaterial color="#b9c2c5" metalness={0.75} roughness={0.22} />
+      </mesh>
+      <mesh position={[w * 0.36 + 0.55, 0.32, 0]} castShadow>
+        <boxGeometry args={[0.12, 0.65, Math.min(2.8, d * 0.2)]} />
+        <meshStandardMaterial color="#b9c2c5" metalness={0.75} roughness={0.22} />
+      </mesh>
+    </group>
+  );
+}
+
+function Lounger({ x, z, rotation = 0, scale = 1 }: { x: number; z: number; rotation?: number; scale?: number }) {
+  return (
+    <group position={[x, 0.24 * scale, z]} rotation-y={rotation} scale={scale}>
+      <mesh castShadow>
+        <boxGeometry args={[0.9, 0.14, 2.25]} />
+        <meshStandardMaterial color="#f3eee4" roughness={0.72} />
+      </mesh>
+      <mesh position={[0, 0.45, -0.82]} rotation-x={-0.48} castShadow>
+        <boxGeometry args={[0.9, 0.12, 1.05]} />
+        <meshStandardMaterial color="#f3eee4" roughness={0.72} />
+      </mesh>
+      {[-0.34, 0.34].map((px) => (
+        <mesh key={px} position={[px, -0.13, 0]} castShadow>
+          <boxGeometry args={[0.08, 0.22, 2.1]} />
+          <meshStandardMaterial color="#8d6747" roughness={0.9} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function Parasol({ x, z, scale = 1, color = "#f0d9b4" }: { x: number; z: number; scale?: number; color?: string }) {
+  return (
+    <group position={[x, 0, z]} scale={scale}>
+      <mesh position-y={1.45} castShadow>
+        <cylinderGeometry args={[0.045, 0.06, 2.9, 8]} />
+        <meshStandardMaterial color="#a87851" roughness={0.75} />
+      </mesh>
+      <mesh position-y={2.85} castShadow>
+        <coneGeometry args={[1.35, 0.48, 12]} />
+        <meshStandardMaterial color={color} roughness={0.85} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
+  );
+}
+
+function Sofa({ x, z, rotation = 0, width = 2.6 }: { x: number; z: number; rotation?: number; width?: number }) {
+  return (
+    <group position={[x, 0, z]} rotation-y={rotation}>
+      <mesh position-y={0.42} castShadow>
+        <boxGeometry args={[width, 0.52, 0.85]} />
+        <meshStandardMaterial color="#668b80" roughness={0.92} />
+      </mesh>
+      <mesh position={[0, 0.9, 0.34]} castShadow>
+        <boxGeometry args={[width, 0.72, 0.18]} />
+        <meshStandardMaterial color="#54776f" roughness={0.95} />
+      </mesh>
+      {[-1, 1].map((side) => (
+        <mesh key={side} position={[side * (width / 2 - 0.1), 0.58, 0]} castShadow>
+          <boxGeometry args={[0.2, 0.55, 0.92]} />
+          <meshStandardMaterial color="#54776f" roughness={0.95} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function TableSet({ x, z, rotation = 0, chairs = 4 }: { x: number; z: number; rotation?: number; chairs?: number }) {
+  return (
+    <group position={[x, 0, z]} rotation-y={rotation}>
+      <mesh position-y={0.72} castShadow>
+        <boxGeometry args={[2.4, 0.14, 1.15]} />
+        <meshStandardMaterial color="#b18459" roughness={0.82} />
+      </mesh>
+      <mesh position-y={0.36} castShadow>
+        <boxGeometry args={[0.18, 0.72, 0.18]} />
+        <meshStandardMaterial color="#574c43" roughness={0.85} />
+      </mesh>
+      {Array.from({ length: chairs }, (_, i) => {
+        const side = i % 2 === 0 ? -1 : 1;
+        const offset = i < 2 ? -0.65 : 0.65;
+        return (
+          <mesh key={i} position={[offset, 0.42, side * 1.05]} castShadow>
+            <boxGeometry args={[0.62, 0.75, 0.62]} />
+            <meshStandardMaterial color="#66716f" roughness={0.9} />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+function Bed({ x, z, rotation = 0, width = 1.65 }: { x: number; z: number; rotation?: number; width?: number }) {
+  return (
+    <group position={[x, 0, z]} rotation-y={rotation}>
+      <mesh position-y={0.34} castShadow>
+        <boxGeometry args={[width, 0.42, 2.35]} />
+        <meshStandardMaterial color="#e7ded0" roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 0.59, -0.78]} castShadow>
+        <boxGeometry args={[width * 0.86, 0.16, 0.55]} />
+        <meshStandardMaterial color="#f4f0e8" roughness={0.98} />
+      </mesh>
+      <mesh position={[0, 0.66, 1.12]} castShadow>
+        <boxGeometry args={[width + 0.12, 0.95, 0.14]} />
+        <meshStandardMaterial color="#8a6d58" roughness={0.88} />
+      </mesh>
+    </group>
+  );
+}
+
+function ResortDetails() {
+  const loungers = [
+    [234, 107, 0], [234, 115, 0], [234, 123, 0], [297, 108, 0], [297, 118, 0],
+    [297, 128, 0], [252, 160, Math.PI / 2], [261, 160, Math.PI / 2], [271, 160, Math.PI / 2],
+  ] as const;
+  return (
+    <group>
+      <Pool x={240} z={100} w={50} d={52} radius={20} />
+      <Pool x={229} z={147} w={18} d={19} radius={9} />
+      {loungers.map(([x, z, rotation], i) => <Lounger key={i} x={x} z={z} rotation={rotation} scale={2.3} />)}
+      <Parasol x={233} z={136} scale={2.4} color="#f2c96e" />
+      <Parasol x={299} z={145} scale={2.4} color="#e99166" />
+      <Parasol x={281} z={177} scale={2.4} color="#f2c96e" />
+    </group>
+  );
+}
+
+function PoolAreaDetails() {
+  return (
+    <group>
+      <Pool x={14} z={6} w={28} d={22} radius={7} />
+      <Pool x={6} z={24} w={11} d={9} radius={4} />
+      {[10, 16, 22, 28, 34, 40].map((x, i) => <Lounger key={x} x={x} z={31.5} rotation={Math.PI / 2} scale={0.9} />)}
+      <Parasol x={9} z={8} scale={0.85} color="#f2c96e" />
+      <Parasol x={45} z={29} scale={0.9} color="#e99166" />
+      <TableSet x={49} z={12} rotation={Math.PI / 2} />
+    </group>
+  );
+}
+
+function ReceptionDetails() {
+  return (
+    <group>
+      <mesh position={[10.5, 0.65, 6]} castShadow>
+        <boxGeometry args={[7.2, 1.3, 1.05]} />
+        <meshStandardMaterial color="#9b704c" roughness={0.8} />
+      </mesh>
+      <Sofa x={7.5} z={12.4} width={3.4} />
+      <Sofa x={5} z={18.6} rotation={Math.PI / 2} width={3} />
+      <Sofa x={9} z={18.6} rotation={-Math.PI / 2} width={3} />
+      <TableSet x={14.7} z={19.2} chairs={2} />
+      <TableSet x={22} z={12.1} chairs={2} />
+      {[6, 12, 18, 24].map((x) => <Parasol key={x} x={x} z={22} scale={0.28} color="#6a8d73" />)}
+    </group>
+  );
+}
+
+function ConventionDetails() {
+  return (
+    <group>
+      <mesh position={[39, 0.45, 2.2]} castShadow>
+        <boxGeometry args={[7.4, 0.9, 2.2]} />
+        <meshStandardMaterial color="#7d5f4a" roughness={0.9} />
+      </mesh>
+      {[23, 27, 31].flatMap((x) => [4, 8, 12].map((z) => <TableSet key={`${x}-${z}`} x={x} z={z} scale={undefined} />))}
+      {[46.5, 49.2, 51.9, 54.2].flatMap((x) => [4, 7, 10].map((z) => (
+        <mesh key={`${x}-${z}`} position={[x, 0.42, z]} castShadow>
+          <boxGeometry args={[0.72, 0.78, 0.72]} />
+          <meshStandardMaterial color="#5c6c73" roughness={0.9} />
+        </mesh>
+      )))}
+      <Sofa x={14} z={7} rotation={Math.PI / 2} width={3.2} />
+      <Sofa x={14} z={13} rotation={Math.PI / 2} width={3.2} />
+    </group>
+  );
+}
+
+function ApartmentDetails() {
+  return (
+    <group>
+      {Array.from({ length: 9 }, (_, i) => {
+        const x = 3.8 + i * 6.6;
+        return <Bed key={`n-${i}`} x={x} z={7.6} width={1.5} />;
+      })}
+      {[8.2, 16.2, 42.4, 48.8, 55.2].map((x, i) => <Bed key={`s-${x}`} x={x} z={22} rotation={Math.PI} width={1.5} />)}
+      {[6, 13.8, 41.5, 48, 54.5].map((x) => <Sofa key={x} x={x} z={18.2} width={1.6} />)}
+    </group>
+  );
+}
+
+function Furnishings({ plan }: { plan: FloorPlan }) {
+  if (plan.id === "resort") return <ResortDetails />;
+  if (plan.id === "piscina") return <PoolAreaDetails />;
+  if (plan.id === "recepcao") return <ReceptionDetails />;
+  if (plan.id === "convencoes") return <ConventionDetails />;
+  if (plan.id === "apartamentos") return <ApartmentDetails />;
+  return null;
+}
+
 
 function Walls({ plan, opacity }: { plan: FloorPlan; opacity: number }) {
   const thickness = Math.max(0.16, plan.width / 180);
@@ -324,7 +546,8 @@ export function Scene({
     <>
       <color attach="background" args={[sky]} />
       <fog attach="fog" args={[sky, span * 1.6, span * 4.4]} />
-      <ambientLight intensity={wifi ? 0.45 : 0.75} />
+      <hemisphereLight args={["#d7eff8", "#6e7652", wifi ? 0.35 : 0.72]} />
+      <ambientLight intensity={wifi ? 0.35 : 0.5} />
       <directionalLight
         position={[span * 0.6, span, span * 0.5]}
         intensity={wifi ? 1.5 : 2.1}
@@ -373,6 +596,7 @@ export function Scene({
         {!wifi && <Surfaces plan={plan} />}
         {!wifi && <Buildings plan={plan} />}
         {!wifi && <Trees plan={plan} />}
+        {!wifi && <Furnishings plan={plan} />}
 
         {wifi && (
           <Heatmap plan={plan} aps={aps} band={band} opacity={heatmapOpacity} height={0.04} />

@@ -460,6 +460,25 @@ const piscina: FloorPlan = {
     { id: "ps3", name: "AP Bar da Piscina", x: 48, z: 12, y: 2.8, txPower: 18, band: 5 },
     { id: "ps4", name: "AP Vestiários", x: 51, z: 22, y: 2.6, txPower: 16, band: 2.4 },
   ],
+  surfaces: [
+    { kind: "grama", x: 0, z: 0, w: POOL_W, d: POOL_D },
+    { kind: "deck", x: 3, z: 3, w: 54, d: 34, r: 6 },
+    { kind: "agua", x: 14, z: 6, w: 28, d: 22, r: 7 },
+    { kind: "agua", x: 6, z: 24, w: 11, d: 9, r: 4 },
+    { kind: "calcada", x: 2, z: 34, w: 18, d: 4, r: 2 },
+  ],
+  buildings: [
+    { x: 43, z: 8, w: 12, d: 9, h: 3.2, roof: "#d9a273" },
+    { x: 46, z: 19, w: 11, d: 7, h: 3.2, roof: "#d8c8ab" },
+  ],
+  trees: [
+    { x: 4, z: 5, s: 0.7, kind: "palmeira" },
+    { x: 8, z: 9, s: 0.75, kind: "copa" },
+    { x: 5, z: 15, s: 0.7, kind: "palmeira" },
+    { x: 10, z: 19, s: 0.8, kind: "copa" },
+    { x: 54, z: 33, s: 0.7, kind: "palmeira" },
+    { x: 47, z: 34, s: 0.75, kind: "palmeira" },
+  ],
 };
 
 /* ------------------------------------------------------------------ */
