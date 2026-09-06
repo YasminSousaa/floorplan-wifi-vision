@@ -318,7 +318,7 @@ function ConventionDetails() {
         <boxGeometry args={[7.4, 0.9, 2.2]} />
         <meshStandardMaterial color="#7d5f4a" roughness={0.9} />
       </mesh>
-      {[23, 27, 31].flatMap((x) => [4, 8, 12].map((z) => <TableSet key={`${x}-${z}`} x={x} z={z} scale={undefined} />))}
+      {[23, 27, 31].flatMap((x) => [4, 8, 12].map((z) => <TableSet key={`${x}-${z}`} x={x} z={z} />))}
       {[46.5, 49.2, 51.9, 54.2].flatMap((x) => [4, 7, 10].map((z) => (
         <mesh key={`${x}-${z}`} position={[x, 0.42, z]} castShadow>
           <boxGeometry args={[0.72, 0.78, 0.72]} />
