@@ -392,9 +392,9 @@ function RoomLabels({ plan }: { plan: FloorPlan }) {
   const size = Math.max(0.3, plan.width / 46);
   return (
     <>
-      {plan.rooms.map((r) => (
+      {plan.rooms.map((r, i) => (
         <Text
-          key={r.name}
+          key={`${r.name}-${i}`}
           position={[r.x + r.w / 2, 0.4, r.z + r.d / 2]}
           rotation-x={-Math.PI / 2}
           fontSize={size}
