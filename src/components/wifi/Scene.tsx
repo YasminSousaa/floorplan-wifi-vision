@@ -231,16 +231,17 @@ function TableSet({ x, z, rotation = 0, chairs = 4 }: { x: number; z: number; ro
         <boxGeometry args={[0.18, 0.72, 0.18]} />
         <meshStandardMaterial color="#574c43" roughness={0.85} />
       </mesh>
-      {Array.from({ length: chairs }, (_, i) => {
-        const side = i % 2 === 0 ? -1 : 1;
-        const offset = i < 2 ? -0.65 : 0.65;
-        return (
-          <mesh key={i} position={[offset, 0.42, side * 1.05]} castShadow>
-            <boxGeometry args={[0.62, 0.75, 0.62]} />
-            <meshStandardMaterial color="#66716f" roughness={0.9} />
-          </mesh>
-        );
-      })}
+      {/* Cadeiras instanciadas: mesma geometria/material, só a posição muda —
+          1 draw call para o conjunto inteiro em vez de 1 por cadeira. */}
+      <Instances limit={chairs} castShadow>
+        <boxGeometry args={[0.62, 0.75, 0.62]} />
+        <meshStandardMaterial color="#66716f" roughness={0.9} />
+        {Array.from({ length: chairs }, (_, i) => {
+          const side = i % 2 === 0 ? -1 : 1;
+          const offset = i < 2 ? -0.65 : 0.65;
+          return <Instance key={i} position={[offset, 0.42, side * 1.05]} />;
+        })}
+      </Instances>
     </group>
   );
 }
@@ -319,12 +320,15 @@ function ConventionDetails() {
         <meshStandardMaterial color="#7d5f4a" roughness={0.9} />
       </mesh>
       {[23, 27, 31].flatMap((x) => [4, 8, 12].map((z) => <TableSet key={`${x}-${z}`} x={x} z={z} />))}
-      {[46.5, 49.2, 51.9, 54.2].flatMap((x) => [4, 7, 10].map((z) => (
-        <mesh key={`${x}-${z}`} position={[x, 0.42, z]} castShadow>
-          <boxGeometry args={[0.72, 0.78, 0.72]} />
-          <meshStandardMaterial color="#5c6c73" roughness={0.9} />
-        </mesh>
-      )))}
+      {/* Grade de cadeiras soltas — mesma geometria/material repetidos 12x,
+          instanciados em 1 draw call em vez de 12. */}
+      <Instances limit={12} castShadow>
+        <boxGeometry args={[0.72, 0.78, 0.72]} />
+        <meshStandardMaterial color="#5c6c73" roughness={0.9} />
+        {[46.5, 49.2, 51.9, 54.2].flatMap((x) =>
+          [4, 7, 10].map((z) => <Instance key={`${x}-${z}`} position={[x, 0.42, z]} />),
+        )}
+      </Instances>
       <Sofa x={14} z={7} rotation={Math.PI / 2} width={3.2} />
       <Sofa x={14} z={13} rotation={Math.PI / 2} width={3.2} />
     </group>
@@ -356,34 +360,57 @@ function Furnishings({ plan }: { plan: FloorPlan }) {
 
 function Walls({ plan, opacity }: { plan: FloorPlan; opacity: number }) {
   const thickness = Math.max(0.16, plan.width / 180);
-  return (
-    <group>
-      {plan.walls.map((w, i) => {
+
+  // Geometria/posição/cor de cada parede só dependem da planta, não da
+  // opacidade — memoizar evita recalcular hypot/atan2 para todas as
+  // paredes a cada movimento do slider de opacidade.
+  const items = useMemo(
+    () =>
+      plan.walls.map((w, i) => {
         const len = Math.hypot(w.x2 - w.x1, w.z2 - w.z1);
         const angle = Math.atan2(w.z2 - w.z1, w.x2 - w.x1);
         const h = w.kind === "vidro" ? plan.wallHeight * 0.92 : plan.wallHeight;
         const color =
           w.kind === "concreto" ? "#8f97a8" : w.kind === "drywall" ? "#b9c0cc" : "#7fd9e8";
-        return (
-          <mesh
-            key={i}
-            castShadow
-            receiveShadow
-            position={[(w.x1 + w.x2) / 2, h / 2, (w.z1 + w.z2) / 2]}
-            rotation-y={-angle}
-          >
-            <boxGeometry args={[len + thickness, h, thickness]} />
-            <meshStandardMaterial
-              color={color}
-              roughness={w.kind === "vidro" ? 0.08 : 0.85}
-              metalness={w.kind === "vidro" ? 0.3 : 0.05}
-              transparent
-              opacity={w.kind === "vidro" ? opacity * 0.35 : opacity}
-              depthWrite={opacity > 0.85}
-            />
-          </mesh>
-        );
-      })}
+        return {
+          key: i,
+          kind: w.kind,
+          len,
+          h,
+          color,
+          position: [(w.x1 + w.x2) / 2, h / 2, (w.z1 + w.z2) / 2] as [number, number, number],
+          rotationY: -angle,
+        };
+      }),
+    [plan],
+  );
+
+  return (
+    <group>
+      {items.map((it) => (
+        <mesh
+          key={it.key}
+          // Só paredes estruturais (concreto) geram sombra — divisórias
+          // finas de drywall/vidro continuam recebendo sombra normalmente,
+          // mas deixam de custar uma passada extra no shadow map. Em
+          // "apartamentos", por exemplo, isso tira 58 das 74 paredes do
+          // cálculo de sombra.
+          castShadow={it.kind === "concreto"}
+          receiveShadow
+          position={it.position}
+          rotation-y={it.rotationY}
+        >
+          <boxGeometry args={[it.len + thickness, it.h, thickness]} />
+          <meshStandardMaterial
+            color={it.color}
+            roughness={it.kind === "vidro" ? 0.08 : 0.85}
+            metalness={it.kind === "vidro" ? 0.3 : 0.05}
+            transparent
+            opacity={it.kind === "vidro" ? opacity * 0.35 : opacity}
+            depthWrite={opacity > 0.85}
+          />
+        </mesh>
+      ))}
     </group>
   );
 }
