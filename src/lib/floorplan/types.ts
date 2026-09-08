@@ -54,7 +54,16 @@ export type Surface = {
 
 export type Tree = { x: number; z: number; s: number; kind: "palmeira" | "copa" };
 
-export type Building = { x: number; z: number; w: number; d: number; h: number; roof?: string };
+export type Building = {
+  x: number;
+  z: number;
+  w: number;
+  d: number;
+  h: number;
+  roof?: string;
+  /** Tipologia arquitetônica — define o formato do telhado. Sem valor = comportamento legado (laje plana). */
+  kind?: "guest" | "lobby" | "event" | "dining";
+};
 
 export type FloorPlan = {
   id: string;
