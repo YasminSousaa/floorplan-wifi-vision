@@ -131,29 +131,29 @@ export const resort: FloorPlan = {
   accessPoints: [],
   modelOnly: true,
   buildings: [
-    // serviço (noroeste)
+    // serviço (noroeste) — sem kind: mantém a laje plana original
     { x: 32, z: 13, w: 31, d: 54, h: 7, roof: "#cbb79a" },
-    // blocos de hospedagem
-    { x: 89, z: 7, w: 66, d: 34, h: 15, roof: "#e2cfae" },
-    { x: 175, z: 7, w: 58, d: 34, h: 15, roof: "#e2cfae" },
-    { x: 91, z: 63, w: 63, d: 30, h: 15, roof: "#e2cfae" },
-    { x: 174, z: 63, w: 59, d: 30, h: 15, roof: "#e2cfae" },
-    { x: 108, z: 112, w: 53, d: 31, h: 15, roof: "#e2cfae" },
-    { x: 172, z: 112, w: 55, d: 31, h: 15, roof: "#e2cfae" },
-    { x: 108, z: 165, w: 53, d: 30, h: 15, roof: "#e2cfae" },
-    { x: 172, z: 165, w: 55, d: 30, h: 15, roof: "#e2cfae" },
-    // área de lazer / salão de jogos
-    { x: 250, z: 6, w: 47, d: 48, h: 9, roof: "#d9c7a8" },
-    // recepção / lobby
-    { x: 46, z: 91, w: 48, d: 102, h: 9, roof: "#efdcba" },
-    // eventos
-    { x: 101, z: 208, w: 95, d: 75, h: 11, roof: "#cfc6de" },
-    { x: 213, z: 208, w: 83, d: 75, h: 11, roof: "#cfc6de" },
-    // serviços de apoio (cozinha, refeitório, manutenção)
+    // blocos de hospedagem — telhado de duas águas
+    { x: 89, z: 7, w: 66, d: 34, h: 15, kind: "guest" },
+    { x: 175, z: 7, w: 58, d: 34, h: 15, kind: "guest" },
+    { x: 91, z: 63, w: 63, d: 30, h: 15, kind: "guest" },
+    { x: 174, z: 63, w: 59, d: 30, h: 15, kind: "guest" },
+    { x: 108, z: 112, w: 53, d: 31, h: 15, kind: "guest" },
+    { x: 172, z: 112, w: 55, d: 31, h: 15, kind: "guest" },
+    { x: 108, z: 165, w: 53, d: 30, h: 15, kind: "guest" },
+    { x: 172, z: 165, w: 55, d: 30, h: 15, kind: "guest" },
+    // área de lazer / salão de jogos — palapa
+    { x: 250, z: 6, w: 47, d: 48, h: 9, kind: "dining" },
+    // recepção / lobby — laje com parapeito, tom quente
+    { x: 46, z: 91, w: 48, d: 102, h: 9, kind: "lobby" },
+    // eventos — laje com parapeito, tom frio
+    { x: 101, z: 208, w: 95, d: 75, h: 11, kind: "event" },
+    { x: 213, z: 208, w: 83, d: 75, h: 11, kind: "event" },
+    // serviços de apoio (cozinha, refeitório, manutenção) — sem kind: mantém a laje plana original
     { x: 298, z: 227, w: 73, d: 60, h: 8, roof: "#c3d1de" },
-    // restaurantes
-    { x: 313, z: 100, w: 39, d: 39, h: 5, roof: "#d9a273" },
-    { x: 312, z: 202, w: 36, d: 29, h: 5, roof: "#d9a273" },
+    // restaurantes — palapa
+    { x: 313, z: 100, w: 39, d: 39, h: 5, kind: "dining" },
+    { x: 312, z: 202, w: 36, d: 29, h: 5, kind: "dining" },
   ],
   surfaces: [
     // base

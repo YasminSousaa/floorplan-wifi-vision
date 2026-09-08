@@ -73,22 +73,136 @@ function Surfaces({ plan }: { plan: FloorPlan }) {
   );
 }
 
+/**
+ * Geometria de um telhado de duas águas (prisma triangular): cumeeira ao
+ * longo do eixo X local, alinhada com o lado mais comprido do prédio.
+ * Sombreamento plano por face (não-indexado + computeVertexNormals) para
+ * ler como facetas de telhado, não como uma superfície curva.
+ */
+function gableRoofGeometry(ridgeLength: number, baseWidth: number, ridgeHeight: number) {
+  const hw = ridgeLength / 2;
+  const hd = baseWidth / 2;
+  const A = [-hw, 0, -hd];
+  const B = [-hw, 0, hd];
+  const C = [-hw, ridgeHeight, 0];
+  const D = [hw, 0, -hd];
+  const E = [hw, 0, hd];
+  const F = [hw, ridgeHeight, 0];
+  const tris = [A, B, C, D, F, E, A, C, F, A, F, D, B, E, F, B, F, C];
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(tris.flat()), 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+
+function GuestRoof({ w, d, h, color }: { w: number; d: number; h: number; color: string }) {
+  const long = Math.max(w, d);
+  const short = Math.min(w, d);
+  const ridgeHeight = Math.min(h * 0.32, short * 0.42);
+  const geo = useMemo(
+    () => gableRoofGeometry(long + 1, short + 1, ridgeHeight),
+    [long, short, ridgeHeight],
+  );
+  return (
+    <mesh castShadow geometry={geo} position-y={h} rotation-y={d > w ? Math.PI / 2 : 0}>
+      <meshStandardMaterial color={color} roughness={0.72} />
+    </mesh>
+  );
+}
+
+function PalapaRoof({ w, d, h, color }: { w: number; d: number; h: number; color: string }) {
+  const radius = Math.max(w, d) * 0.6;
+  const coneHeight = radius * 0.62;
+  return (
+    <mesh castShadow position-y={h + coneHeight / 2} rotation-y={Math.PI / 8}>
+      <coneGeometry args={[radius, coneHeight, 8]} />
+      <meshStandardMaterial color={color} roughness={0.95} />
+    </mesh>
+  );
+}
+
+function FlatParapetRoof({
+  w,
+  d,
+  h,
+  color,
+  trim,
+}: {
+  w: number;
+  d: number;
+  h: number;
+  color: string;
+  trim: string;
+}) {
+  const ow = w + 1.2;
+  const od = d + 1.2;
+  const t = 0.35;
+  return (
+    <group position-y={h}>
+      <mesh castShadow position-y={0.45}>
+        <boxGeometry args={[ow, 0.9, od]} />
+        <meshStandardMaterial color={color} roughness={0.78} />
+      </mesh>
+      <mesh position={[0, 0.95, -od / 2 + t / 2]}>
+        <boxGeometry args={[ow, 0.5, t]} />
+        <meshStandardMaterial color={trim} roughness={0.6} />
+      </mesh>
+      <mesh position={[0, 0.95, od / 2 - t / 2]}>
+        <boxGeometry args={[ow, 0.5, t]} />
+        <meshStandardMaterial color={trim} roughness={0.6} />
+      </mesh>
+      <mesh position={[-ow / 2 + t / 2, 0.95, 0]}>
+        <boxGeometry args={[t, 0.5, od]} />
+        <meshStandardMaterial color={trim} roughness={0.6} />
+      </mesh>
+      <mesh position={[ow / 2 - t / 2, 0.95, 0]}>
+        <boxGeometry args={[t, 0.5, od]} />
+        <meshStandardMaterial color={trim} roughness={0.6} />
+      </mesh>
+    </group>
+  );
+}
+
+const BUILDING_STYLE = {
+  guest: { wall: "#efe6d3", roof: "#c1633b" },
+  lobby: { wall: "#f2efe6", roof: "#ece7d8", trim: "#c9b995" },
+  event: { wall: "#edeee9", roof: "#f4f3ee", trim: "#a9afae" },
+  dining: { wall: "#e8d9c2", roof: "#8b6239" },
+} as const;
+
 function Buildings({ plan }: { plan: FloorPlan }) {
   const items = plan.buildings ?? [];
   return (
     <group>
-      {items.map((b, i) => (
-        <group key={i} position={[b.x + b.w / 2, 0, b.z + b.d / 2]}>
-          <mesh castShadow receiveShadow position={[0, b.h / 2, 0]}>
-            <boxGeometry args={[b.w, b.h, b.d]} />
-            <meshStandardMaterial color="#e7ded0" roughness={0.85} />
-          </mesh>
-          <mesh castShadow position={[0, b.h + 0.5, 0]}>
-            <boxGeometry args={[b.w + 1.2, 1, b.d + 1.2]} />
-            <meshStandardMaterial color={b.roof ?? "#d8c8ab"} roughness={0.9} />
-          </mesh>
-        </group>
-      ))}
+      {items.map((b, i) => {
+        const style = b.kind ? BUILDING_STYLE[b.kind] : null;
+        return (
+          <group key={i} position={[b.x + b.w / 2, 0, b.z + b.d / 2]}>
+            <mesh castShadow receiveShadow position={[0, b.h / 2, 0]}>
+              <boxGeometry args={[b.w, b.h, b.d]} />
+              <meshStandardMaterial color={style?.wall ?? "#e7ded0"} roughness={0.85} />
+            </mesh>
+
+            {b.kind === "guest" && <GuestRoof w={b.w} d={b.d} h={b.h} color={style!.roof} />}
+            {b.kind === "dining" && <PalapaRoof w={b.w} d={b.d} h={b.h} color={style!.roof} />}
+            {(b.kind === "lobby" || b.kind === "event") && (
+              <FlatParapetRoof
+                w={b.w}
+                d={b.d}
+                h={b.h}
+                color={style!.roof}
+                trim={b.kind === "lobby" ? BUILDING_STYLE.lobby.trim : BUILDING_STYLE.event.trim}
+              />
+            )}
+            {!b.kind && (
+              <mesh castShadow position={[0, b.h + 0.5, 0]}>
+                <boxGeometry args={[b.w + 1.2, 1, b.d + 1.2]} />
+                <meshStandardMaterial color={b.roof ?? "#d8c8ab"} roughness={0.9} />
+              </mesh>
+            )}
+          </group>
+        );
+      })}
     </group>
   );
 }
